@@ -23,6 +23,23 @@ def jwt_secret_key() -> str:
     return os.getenv("JWT_SECRET_KEY", "dev-only-private-signing-key")
 
 
+def session_idle_minutes() -> int:
+    try:
+        return int(os.getenv("SESSION_IDLE_MINUTES", "30"))
+    except ValueError:
+        return 30
+
+
+def bootstrap_finance() -> tuple[str, str] | None:
+    """First Finance user's credentials (BOOTSTRAP_FINANCE_* or the platform's _ADMIN_*)."""
+    for prefix in ("BOOTSTRAP_FINANCE", "BOOTSTRAP_ADMIN"):
+        email = os.getenv(f"{prefix}_EMAIL")
+        pw = os.getenv(f"{prefix}_PASSWORD")
+        if email and pw:
+            return email, pw
+    return None
+
+
 def media_root() -> str:
     """Writable directory that survives redeploys (local receipt storage)."""
     return os.getenv("MEDIA_ROOT", "./media")

@@ -1,6 +1,9 @@
 import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
 
+import { getSessionToken } from "@/lib/api";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { Icons } from "@/lib/icons";
+import { useNavigate } from "@/lib/navigate";
 import SignIn from "@/screens/SignIn";
 import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
@@ -13,7 +16,12 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   ].join(" ");
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
+// Signed-out visitors are redirected to /sign-in.
 function AppShellLayout() {
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  if (!getSessionToken() || (!loading && !user)) return <Navigate to="/sign-in" replace />;
+  if (loading || !user) return null;
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -40,6 +48,16 @@ function AppShellLayout() {
               {"User guide"}
             </NavLink>
           </nav>
+          <p className="ml-auto text-sm" data-testid="current-user">
+            {user.name} ({user.role})
+          </p>
+          <button
+            type="button"
+            className="rounded-[var(--brand-radius)] px-3 py-2 text-sm font-medium"
+            onClick={() => signOut().then(() => navigate("sign-in"))}
+          >
+            Sign out
+          </button>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
@@ -51,14 +69,16 @@ function AppShellLayout() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<AppShellLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/claim" element={<Claim />} />
-        <Route path="/help" element={<Help />} />
-      </Route>
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="*" element={<Navigate to="/sign-in" replace />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<AppShellLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/claim" element={<Claim />} />
+          <Route path="/help" element={<Help />} />
+        </Route>
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }

@@ -13,7 +13,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import config, models  # noqa: F401 -- models imported so tables register
-from app.database import Base, engine
+from app.auth import seed_bootstrap_user
+from app.database import Base, SessionLocal, engine
+from app.routers import auth as auth_router
 
 
 @asynccontextmanager
@@ -31,6 +33,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # changes only through Alembic migrations (`alembic upgrade head`).
     if engine.dialect.name == "sqlite":
         Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        seed_bootstrap_user(db)
     yield
 
 
@@ -53,6 +57,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(auth_router.router, prefix="/api")
+
+
+@app.get("/api/healthz")
+async def healthz() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.get("/health")
