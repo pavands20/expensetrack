@@ -71,7 +71,9 @@ describe("Users", () => {
 
   it("[AC-009] deactivate asks for confirmation then posts", async () => {
     const f = setup((_u, init) =>
-      init?.method === "POST" ? res(200, mk(2, "Zed", { is_active: false })) : res(200, [mk(2, "Zed")]),
+      init?.method === "POST"
+        ? res(200, mk(2, "Zed", { is_active: false }))
+        : res(200, [mk(2, "Zed")]),
     );
     await screen.findByText("Zed@x.co");
     await userEvent.click(screen.getByRole("button", { name: "Deactivate Zed" }));

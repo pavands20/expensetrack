@@ -123,7 +123,11 @@ export default function Screen() {
               style={glass}
             />
             {error && (
-              <p role="alert" className="text-sm font-semibold" style={{ color: brand.accentColor }}>
+              <p
+                role="alert"
+                className="text-sm font-semibold"
+                style={{ color: brand.accentColor }}
+              >
                 {error}
               </p>
             )}

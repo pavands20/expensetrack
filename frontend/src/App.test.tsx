@@ -7,7 +7,9 @@ import App from "./App";
 import { setSessionToken } from "@/lib/api";
 
 function reply(status: number, body?: unknown) {
-  return Promise.resolve(new Response(body === undefined ? null : JSON.stringify(body), { status }));
+  return Promise.resolve(
+    new Response(body === undefined ? null : JSON.stringify(body), { status }),
+  );
 }
 const user = (role: string) => ({
   id: 1,
