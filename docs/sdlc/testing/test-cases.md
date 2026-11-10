@@ -3,38 +3,35 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-23 tests · Passed 22 · Failed 0 · Skipped 0 · Not run 1
+20 tests · Passed 6 · Failed 13 · Skipped 0 · Not run 1
 
-Acceptance criteria covered: 8/102 · passing: 8/102
+Acceptance criteria covered: 7/102 · passing: 1/102
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
 ## Sprint 1
 
-### US-001: Finance creates user accounts
+### US-005: Sign in with email and password
 
 | Criteria | Test | Level | Result | File |
 |---|---|---|---|---|
-| AC-010 | test_ac010_reset_generic | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-017 | test_ac017_login_returns_token_no_cookie | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-018 | test_ac018_generic_401 | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-019 | test_ac019_me_requires_token | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-020 | test_ac020_hashes_stored | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-021 | test_ac021_logout_revokes | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-022 | test_ac022_idle_expiry | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-023 | test_ac023_deactivated_and_revoke_helper | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| — | test_require_role_403 | Integration | Passed | `backend/tests/integration/test_auth.py` |
-| AC-010 | test_ac010_reset_identical | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-017 | test_ac017_login_then_me | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-017 | test_ac017_no_set_cookie_on_auth_responses | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-018 | test_ac018_identical_401_body | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-019 | test_ac019_protected_401 | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-020 | test_ac020_nfr001_nothing_plaintext | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-021 | test_ac021_logout | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-022 | test_ac022_idle_window | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-023 | test_ac023_deactivation | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| AC-023 | test_ac023_revoke_user_sessions | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
-| — | test_nfr004_admin_endpoints_finance_only | Integration | Passed | `backend/tests/integration/test_auth_qa.py` |
+| AC-017 | test_ac017_login_returns_token_and_user_and_me_works | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-018 | test_ac018_failures_return_identical_401 | Unit | Passed | `backend/tests/test_auth.py` |
+| AC-019 | test_ac019_login_and_healthz_need_no_token | Unit | Passed | `backend/tests/test_auth.py` |
+| AC-019 | test_ac019_protected_routes_require_token[get-/api/auth/me] | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-019 | test_ac019_protected_routes_require_token[get-/api/users] | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-019 | test_ac019_protected_routes_require_token[post-/api/auth/logout] | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-019 | test_ac019_protected_routes_require_token[post-/api/users/1/deactivate] | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-020 | test_ac020_nfr001_password_hashed_and_no_raw_token | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-021 | test_ac021_logout_invalidates_token | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-022 | test_ac022_activity_within_window_keeps_session_alive | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-022 | test_ac022_idle_minutes_setting_respected | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-022 | test_ac022_idle_session_expires | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-023 | test_ac023_deactivate_endpoint_revokes_sessions | Unit | Failed | `backend/tests/test_auth.py` |
+| AC-023 | test_ac023_deactivated_user_token_rejected | Unit | Failed | `backend/tests/test_auth.py` |
+| — | test_first_admin_not_seeded_when_unset | Unit | Passed | `backend/tests/test_auth.py` |
+| — | test_first_admin_seed_creates_one_finance_user_no_duplicate | Unit | Failed | `backend/tests/test_auth.py` |
+| — | test_nfr003_generic_message_same_for_known_and_unknown | Unit | Passed | `backend/tests/test_auth.py` |
 
 ## Project setup
 

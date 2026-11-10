@@ -22,6 +22,13 @@ _No E2E run yet._
 | Step | Status | Ticket | Finished |
 |---|---|---|---|
 | run_checks | failed | — | 2026-11-10 |
+| write_tests | succeeded | US-005 | 2026-11-10 |
+
+### Sprint 1
+
+| Step | Status | Ticket | Finished |
+|---|---|---|---|
+| run_checks | failed | — | 2026-11-10 |
 | write_tests | succeeded | US-001 | 2026-11-10 |
 
 ### Sprint 1
