@@ -7,89 +7,91 @@ _Up to date._
 <!-- sdlc:auto:end status -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `33b0517` · model `auto`
+Generated from commit `36bad1f` · model `auto`
 <!-- sdlc:auto:end source -->
 
 <!-- sdlc:auto:start overview -->
-ExpenseTrack is a generated two-application repository for handling employee expense claims, with Employee, Manager and Finance roles, multi-line claims and a two-step approval flow. `frontend/` is a Vite + React 19 single-page app using TypeScript, Tailwind CSS v4 and React Router 7. Its approved screens currently render seeded sample data. `src/lib/api.ts` provides an `apiFetch` helper as the seam for wiring screens to real endpoints. `backend/` is a FastAPI 0.115 service using SQLAlchemy 2. It defaults to a local SQLite database (`sqlite:///./app.db`) and switches to another database, such as the PostgreSQL 16 in `docker-compose.yml`, when `DATABASE_URL` is set. The backend has no models or routers yet: its only route is `GET /health`. Tables are created from the models at startup, and there are no migrations.
+ExpenseTrack is an early-stage scaffold for an employee expense-claims app: employees submit claims, managers and Finance approve them, and Finance marks them paid. The repository holds two applications. `frontend/` is a Vite + React 19 + TypeScript single-page app styled with Tailwind CSS v4 and routed with react-router-dom v7. Its four screens (SignIn, Dashboard, Claim, Help) render seeded sample data and do not call the API yet. `frontend/src/lib/api.ts` provides `apiFetch` as the seam for wiring screens to the backend. `backend/` is a FastAPI 0.115 service using SQLAlchemy 2.0. It defines no models and no feature routes yet, and its only endpoint is `GET /health`. It uses SQLite (`sqlite:///./app.db`) by default and can be pointed at PostgreSQL 16 through `DATABASE_URL`. Tables are created from the models at startup with `create_all`, and there are no migrations. A GitHub Actions workflow deploys on every push to `main`: it pushes the backend Docker image to AWS ECR and publishes the frontend build to AWS Amplify.
 <!-- sdlc:auto:end overview -->
 
 <!-- sdlc:auto:start prerequisites -->
-- Node.js with npm (for `frontend/`)
-- Python 3.12 with pip (the backend Dockerfile uses `python:3.12-slim`)
-- Docker with Compose (optional: for the PostgreSQL 16 service in `docker-compose.yml` and for building the backend image)
+- Node.js with npm (for the frontend; the manifests do not pin a version)
+- Python 3.12 (the version used by backend/Dockerfile)
+- Docker with Docker Compose (optional; only needed to run the PostgreSQL 16 service in docker-compose.yml or to build the backend image)
 <!-- sdlc:auto:end prerequisites -->
 
 <!-- sdlc:auto:start setup -->
-1. cd frontend && npm install
-2. cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
-3. (Optional, to use PostgreSQL instead of the default SQLite) docker compose up -d db
-4. (Optional, with the db service running) export DATABASE_URL=postgresql+psycopg://app:app@localhost:5432/app
-5. cd backend && .venv/bin/python -m uvicorn app.main:app --reload
-6. cd frontend && npm run dev
+1. Create a backend virtualenv at backend/.venv, the location the Playwright config expects: cd backend && python3.12 -m venv .venv
+2. Install the backend dependencies, including pytest, pytest-cov, httpx and ruff: .venv/bin/pip install -r requirements.txt
+3. Start the API. It uses ./app.db (SQLite) unless DATABASE_URL is set, and creates its tables on startup: .venv/bin/uvicorn app.main:app --reload
+4. (Optional, for PostgreSQL) From the repo root: docker compose up -d db. Then start the API with DATABASE_URL=postgresql+psycopg://app:app@localhost:5432/app (credentials from docker-compose.yml; driver from psycopg in requirements.txt)
+5. In a second terminal, install the frontend dependencies: cd frontend && npm install
+6. Start the frontend dev server: npm run dev. It runs on http://localhost:5173, which is the backend's default CORS origin. The API client defaults to http://localhost:8000 unless VITE_API_BASE_URL is set.
 <!-- sdlc:auto:end setup -->
 
 <!-- sdlc:auto:start run -->
 | Name | Command | Description |
 |---|---|---|
-| frontend dev | `cd frontend && npm run dev` | Starts the Vite dev server (the backend's default CORS origins allow http://localhost:5173 and http://127.0.0.1:5173). |
-| frontend build | `cd frontend && npm run build` | Bundles the app with `vite build`. This does not typecheck. |
-| frontend preview | `cd frontend && npm run preview` | Serves the production build locally. |
-| typecheck | `cd frontend && npm run typecheck` | Runs `tsc --noEmit` over `src/`. |
-| lint | `cd frontend && npm run lint` | Runs ESLint over the frontend. The platform uses this as a gate, so keep it passing. |
-| lint:fix | `cd frontend && npm run lint:fix` | Runs ESLint and applies the automatic fixes it can. |
-| format | `cd frontend && npm run format` | Formats the frontend with Prettier (writes files). |
-| format:check | `cd frontend && npm run format:check` | Checks Prettier formatting without writing files. |
-| backend dev | `cd backend && uvicorn app.main:app --reload` | Runs the FastAPI service with auto-reload on port 8000. The health check is at /health. |
-| backend lint | `cd backend && ruff check .` | Lints the backend with Ruff. |
-| backend format | `cd backend && ruff format .` | Formats the backend with Ruff. |
-| database | `docker compose up -d db` | Starts PostgreSQL 16 on port 5432 with user, password and database all set to `app`. Data persists in the `db-data` volume. |
-| backend image | `docker build -t expensetrack-backend backend` | Builds the backend container from `backend/Dockerfile`. The image runs uvicorn on port 8000 as a non-root user and has a /health HEALTHCHECK. The image tag is an example name. |
+| frontend dev | `cd frontend && npm run dev` | Starts the Vite dev server for the React SPA. |
+| frontend build | `cd frontend && npm run build` | Bundles the app into frontend/dist with vite build. This does not typecheck. |
+| frontend preview | `cd frontend && npm run preview` | Serves the production build locally with vite preview. |
+| frontend typecheck | `cd frontend && npm run typecheck` | Runs tsc --noEmit to catch type errors that vite build skips. |
+| frontend lint | `cd frontend && npm run lint` | Runs ESLint over the app. Use npm run lint:fix to apply automatic fixes. The README asks that lint stays green. |
+| frontend format | `cd frontend && npm run format` | Formats files with Prettier. npm run format:check verifies formatting without writing changes. |
+| backend dev | `cd backend && uvicorn app.main:app --reload` | Runs the FastAPI app with auto-reload on http://localhost:8000. GET /health returns {"status": "ok"}. |
+| backend lint | `cd backend && ruff check .` | Lints the backend with Ruff, configured in backend/ruff.toml. |
+| backend format | `cd backend && ruff format .` | Formats the backend code with Ruff. |
+| database | `docker compose up -d db` | Starts PostgreSQL 16 (user, password and database all 'app') on port 5432, with a persistent db-data volume. |
+| backend container | `cd backend && docker build -t expensetrack-api . && docker run -p 8000:8000 expensetrack-api` | Builds and runs the backend image from backend/Dockerfile. It runs uvicorn on port 8000 as a non-root user, with a /health healthcheck. |
 <!-- sdlc:auto:end run -->
 
 <!-- sdlc:auto:start structure -->
 | Path | Purpose |
 |---|---|
-| `.devcontainer/` | Dev container configuration (`devcontainer.json`). |
-| `.quorq/` | Platform handoff metadata (`handoff.json`) from the Quorq AI SDLC platform. |
-| `backend/` | FastAPI service: Dockerfile, `requirements.txt`, `pytest.ini`, `ruff.toml`. |
-| `backend/app/` | Application package. `main.py` holds the app, CORS setup and /health. `database.py` holds the engine, `SessionLocal` and the `get_db` dependency. `models.py` holds SQLAlchemy models (none yet). `schemas.py` holds Pydantic models, including `StubResponse`. `routers/` will hold the generated routers (empty). |
-| `backend/tests/` | Pytest suite (`conftest.py`, `test_health.py`). |
-| `frontend/` | Vite + React SPA: `package.json`, Vite, TypeScript, ESLint, Prettier and Playwright configs, and `index.html`. |
-| `frontend/src/` | App source. `main.tsx` is the entry point and mounts `App` inside `BrowserRouter`. Also contains `index.css` and `test-setup.ts` for Vitest. `lib/` holds `api.ts` (API client), `ui.tsx` and `icons.tsx` (component and icon vocabulary), and `navigate.ts`. |
-| `frontend/e2e/` | Playwright acceptance specs (`example.spec.ts`). |
+| `.devcontainer` | Dev container definition (devcontainer.json). |
+| `.github/workflows` | deploy.yml: on each push to main, uses AWS OIDC to build and push the backend image to ECR, then builds the frontend and publishes it to an AWS Amplify branch. |
+| `.quorq` | Platform handoff metadata (handoff.json) from the Quorq AI SDLC platform that generated the repo. |
+| `backend` | FastAPI service, with requirements.txt, Dockerfile, pytest.ini and ruff.toml. |
+| `backend/app` | Application package: main.py (app, CORS, lifespan create_all, /health), database.py (engine, SessionLocal, Base, get_db), models.py (SQLAlchemy models; none yet), schemas.py (Pydantic models, currently StubResponse), and routers/ (per-component routers; currently empty). |
+| `backend/tests` | Pytest suite: conftest.py and test_health.py. |
+| `frontend` | Vite + React SPA, with package.json, vite.config.ts, tsconfig.json, eslint.config.js, .prettierrc and playwright.config.ts. |
+| `frontend/src` | App source. main.tsx mounts BrowserRouter. App.tsx holds the nav shell and route table. screens/ has one module per approved screen. lib/ has api.ts (API client), ui.tsx, icons.tsx, brand.ts and navigate.ts. index.css holds the brand CSS variables, and test-setup.ts the Vitest setup. |
+| `frontend/e2e` | Playwright end-to-end specs (example.spec.ts). |
 <!-- sdlc:auto:end structure -->
 
 <!-- sdlc:auto:start conventions -->
-- Frontend imports use the `@/` alias for `frontend/src` (configured in `vite.config.ts` and `tsconfig.json`).
-- Vitest component tests live beside the components they cover and match `src/**/*.{test,spec}.{ts,tsx}`. Playwright specs live in `e2e/`.
-- TypeScript runs in `strict` mode, but `noImplicitAny` and `strictNullChecks` are turned off.
-- Styling uses Tailwind CSS v4 via `@tailwindcss/vite`. Formatting uses Prettier, and `eslint-config-prettier` stops ESLint rules from conflicting with it.
-- Screens render seeded sample data. Calls to the real API should go through `apiFetch` in `src/lib/api.ts`, which reads `VITE_API_BASE_URL` (default `http://localhost:8000`). For the bearer token it uses the session token from localStorage, falling back to `VITE_API_SECRET_KEY`.
-- Backend models inherit `Base` (a SQLAlchemy `DeclarativeBase`) in `app/models.py`. `main.py` imports `app.models` so that `create_all` registers the tables at startup.
-- Request handlers get a database session through the `get_db` dependency (one session per request).
-- The backend plans one router per architecture component under `app/routers/`. Unimplemented routes return the typed `StubResponse` placeholder rather than raising.
-- Backend configuration comes from environment variables: `DATABASE_URL` and `ALLOWED_ORIGINS` (comma-separated). Backend code is linted and formatted with Ruff.
+- Frontend imports use the `@/` alias for `src/` (configured in both vite.config.ts and tsconfig.json).
+- Each screen is a default-exported component in src/screens/. Routes are declared in App.tsx: /dashboard, /claim and /help render inside the AppShellLayout nav, /sign-in renders outside it, and any unknown path redirects to /sign-in.
+- Styling uses Tailwind v4 utility classes plus brand CSS variables such as var(--brand-surface), var(--brand-fg) and var(--brand-radius), defined in index.css and brand.ts.
+- Screens currently render seeded sample data. API calls should go through `apiFetch` in src/lib/api.ts, which reads VITE_API_BASE_URL (default http://localhost:8000). It sends the session token from localStorage, or else VITE_API_SECRET_KEY, as a Bearer header.
+- TypeScript runs in strict mode with noImplicitAny and strictNullChecks turned off.
+- Component tests (*.test.tsx / *.spec.tsx) live beside the components they cover in src/. Playwright specs live only in e2e/.
+- Backend models inherit `Base` from app.database and go in app/models.py, which main.py imports before create_all runs.
+- Database sessions are request-scoped through the `get_db` dependency.
+- Routers go in app/routers/, one per architecture component.
+- Unimplemented routes return the typed `StubResponse` schema rather than raising.
+- Backend configuration comes from environment variables. DATABASE_URL defaults to sqlite:///./app.db. ALLOWED_ORIGINS is a comma-separated CORS list that defaults to localhost:5173 and 127.0.0.1:5173.
+- Backend linting and formatting use Ruff. Test dependencies are kept in the single requirements.txt.
 <!-- sdlc:auto:end conventions -->
 
 <!-- sdlc:auto:start testing -->
 | Name | Command | Description |
 |---|---|---|
-| frontend unit | `cd frontend && npm test` | Runs Vitest component tests (jsdom) once. `--passWithNoTests` means an empty suite still passes. |
-| e2e browser install | `cd frontend && npm run test:e2e:install` | Installs the Chromium browser for Playwright. |
-| e2e | `cd frontend && npm run test:e2e` | Runs Playwright specs from `e2e/`. Without `E2E_BASE_URL`, it first boots the backend from `backend/.venv` on port 8000, then builds and previews the frontend on port 4173. With `E2E_BASE_URL` set, it runs against that URL instead. |
-| backend tests | `cd backend && pytest` | Runs the pytest suite in `tests/`. `pytest.ini` sets `pythonpath = .`, so `import app` works. |
-| backend coverage | `cd backend && pytest --cov=app` | Runs the pytest suite with coverage for the `app` package, using pytest-cov from `requirements.txt`. |
+| backend tests | `cd backend && pytest` | Runs the pytest suite in backend/tests. pytest.ini sets pythonpath=. so `import app` works. pytest-cov is installed for coverage. |
+| frontend unit tests | `cd frontend && npm test` | Runs Vitest component tests in src/ with jsdom (vitest run --passWithNoTests). |
+| e2e browser install | `cd frontend && npm run test:e2e:install` | Downloads the Chromium browser that Playwright needs. |
+| e2e tests | `cd frontend && npm run test:e2e` | Runs Playwright specs in e2e/. If E2E_BASE_URL is unset, it boots the backend from backend/.venv on 127.0.0.1:8000, then builds and previews the frontend on port 4173. If E2E_BASE_URL is set, it runs against that URL instead. |
 <!-- sdlc:auto:end testing -->
 
 <!-- sdlc:auto:start troubleshooting -->
 | Problem | Solution |
 |---|---|
-| The frontend fails to build or start because `@/App` cannot be resolved. | `src/main.tsx` imports `@/App`, and `frontend/README.md` describes `src/App.tsx` and `src/screens/`. Neither appears in this file tree. Make sure `src/App.tsx` exists, or restore it, before running the app. |
-| Browser requests from the SPA to the API are blocked by CORS. | Without `ALLOWED_ORIGINS`, the API only allows http://localhost:5173 and http://127.0.0.1:5173. If you serve the frontend from another origin, such as `npm run preview`, set `ALLOWED_ORIGINS` to that origin (comma-separated for several). |
-| `npm run test:e2e` fails to start the backend web server. | Playwright runs `../backend/.venv/bin/python -m uvicorn ...`. Create the virtualenv at `backend/.venv` and install `requirements.txt` into it first. Also run `npm run test:e2e:install` so Chromium is available. |
-| `npm run build` succeeds, but `npm run typecheck` reports errors. | `vite build` does not typecheck. Fix the reported `tsc` errors. The frontend README notes these usually come from an untyped `useState({})` that is later read for named fields. |
-| The backend fails at startup when `DATABASE_URL` points at PostgreSQL. | Tables are created on startup, so the database must be reachable. Start it with `docker compose up -d db` and wait for its healthcheck to pass. Then check that the URL matches the compose credentials (user, password and database are all `app`, on port 5432). Unset `DATABASE_URL` to fall back to SQLite. |
-| Schema changes to models are not applied to an existing database. | There are no migrations, and `create_all` only creates missing tables. For local SQLite, delete `backend/app.db` and restart. Alembic is recommended before the database holds real data. |
-| Running `pytest` fails with `ModuleNotFoundError: app`. | Run `pytest` from inside `backend/`, so that `pytest.ini` (with `pythonpath = .`) is picked up. |
+| npm run build succeeds but npm run typecheck fails. | This is expected: vite build does not typecheck. The frontend README notes that generated screens often use an untyped useState({}) and then read named fields from it. Add types, then re-run npm run typecheck. |
+| Playwright's webServer fails to start the backend (.venv/bin/python not found). | The config runs the API from backend/.venv. Create that virtualenv and install backend/requirements.txt into it before running npm run test:e2e. |
+| Playwright reports that the browser executable is missing. | Run npm run test:e2e:install in frontend/ to download Chromium. |
+| Browser requests to the API are blocked by CORS. | By default the API allows only http://localhost:5173 and http://127.0.0.1:5173. If the frontend is served from another origin (for example the preview on port 4173), set ALLOWED_ORIGINS to a comma-separated list that includes it. |
+| The API cannot connect to PostgreSQL, or startup fails. | Start the database with docker compose up -d db and wait for its healthcheck to pass. Set DATABASE_URL to a URL that uses the installed psycopg v3 driver, e.g. postgresql+psycopg://app:app@localhost:5432/app. Unset DATABASE_URL to fall back to SQLite. |
+| Schema changes do not appear in an existing database. | There are no migrations: create_all only creates missing tables and never alters existing ones. For local SQLite, delete backend/app.db and restart. The code comments recommend adopting Alembic before any data is worth keeping. |
+| Frontend screens show sample data, not data from the backend. | This is by design. Screens have not been wired to the API yet, and the backend exposes only GET /health. Implement endpoints in backend/app/routers and call them through apiFetch in src/lib/api.ts. |
+| Security concern: .github/workflows/deploy.yml hardcodes VITE_API_SECRET_KEY / NEXT_PUBLIC_API_SECRET_KEY in plain text. | Any value baked into a Vite build is public in the shipped bundle, and this one is also committed to the repo. Treat it as exposed: rotate it, and move any needed value to GitHub secrets. Do not rely on a shared frontend secret for authentication. |
 <!-- sdlc:auto:end troubleshooting -->
