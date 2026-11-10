@@ -1,10 +1,4 @@
-"""Application entrypoint.
-
-Generated from the approved architecture: one router per component that owns
-endpoints, one route per endpoint the API spec declares. Every generated route
-is a stub that returns a typed placeholder, so the service starts, serves its
-OpenAPI document and passes its tests before a single handler is implemented.
-"""
+"""Application entrypoint."""
 
 import os
 from collections.abc import AsyncIterator
@@ -81,5 +75,5 @@ app.include_router(users_router.router)
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness probe, and the only route here that is not a stub."""
+    """Liveness probe."""
     return {"status": "ok"}
