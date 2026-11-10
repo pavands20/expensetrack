@@ -1,20 +1,12 @@
-"""Test fixtures: one fresh database per test, never the application's own.
+"""Test fixtures: real PostgreSQL (DATABASE_URL), one private schema per test."""
 
-Without this file every test shares the SQLite file `DATABASE_URL` names, so a row
-one test writes is still there for the next one, and the order the tests run in
-decides whether they pass. Worse, a deployment that points `DATABASE_URL` at
-Postgres makes the suite need a database server to collect at all.
-
-Each test gets an in-memory database of its own. `StaticPool` keeps every session
-on the one connection that memory lives in, and the `get_db` override makes the
-application use it instead of the engine `app.database` built at import.
-"""
-
+import os
+import uuid
 from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -25,13 +17,29 @@ from app.main import app
 
 @pytest.fixture
 def db_session() -> Iterator[Session]:
-    """An empty database, built and thrown away around one test."""
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        future=True,
-    )
+    """An empty schema in the real database, dropped after the test."""
+    url = os.environ["DATABASE_URL"]
+    if not url.startswith("postgresql"):
+        # DATABASE_URL is not PostgreSQL here: isolate on a private in-memory SQLite.
+        engine = create_engine(
+            "sqlite://",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+            future=True,
+        )
+        Base.metadata.create_all(bind=engine)
+        session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
+        try:
+            yield session
+        finally:
+            session.close()
+            engine.dispose()
+        return
+    schema = "t_" + uuid.uuid4().hex
+    admin = create_engine(url, future=True)
+    with admin.begin() as c:
+        c.execute(text(f'CREATE SCHEMA "{schema}"'))
+    engine = create_engine(url, connect_args={"options": f"-csearch_path={schema}"}, future=True)
     Base.metadata.create_all(bind=engine)
     session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
     try:
@@ -39,6 +47,9 @@ def db_session() -> Iterator[Session]:
     finally:
         session.close()
         engine.dispose()
+        with admin.begin() as c:
+            c.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
+        admin.dispose()
 
 
 @pytest.fixture

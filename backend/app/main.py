@@ -9,26 +9,30 @@ OpenAPI document and passes its tests before a single handler is implemented.
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, engine
+from alembic import command
+from app import models  # noqa: F401 -- registers the tables
+from app.auth import seed_initial_finance
+from app.routers import auth as auth_router
+from app.routers import users as users_router
+
+
+def _alembic_config() -> Config:
+    cfg = Config()
+    cfg.set_main_option("script_location", str(Path(__file__).resolve().parent.parent / "alembic"))
+    return cfg
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """The scaffold ships no migrations, so the tables are created from the models
-    when the application starts. Replace this with Alembic before anything holds data
-    worth keeping.
-
-    This runs on startup and not at import, so importing the application never opens a
-    connection. A test can therefore point `get_db` at a database of its own, and a
-    deployment whose `DATABASE_URL` names a server that is not up fails where you can
-    read the error, not while pytest collects the files.
-    """
-    Base.metadata.create_all(bind=engine)
+    """Apply Alembic migrations, then seed the initial Finance user."""
+    command.upgrade(_alembic_config(), "head")
+    seed_initial_finance()
     yield
 
 
@@ -66,10 +70,13 @@ _allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins or _dev_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router.router)
+app.include_router(users_router.router)
 
 
 @app.get("/health")

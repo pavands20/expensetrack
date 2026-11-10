@@ -13,3 +13,7 @@ pytest>=8.3
 # back to show on the development dashboard.
 pytest-cov>=5.0
 ruff>=0.6
+
+alembic==1.14.0
+argon2-cffi==25.1.0
+email-validator==2.3.0
