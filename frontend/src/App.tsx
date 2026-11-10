@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import { Icons } from "@/lib/icons";
+import { AuthProvider, RequireAuth, useAuth } from "@/lib/auth";
 import SignIn from "@/screens/SignIn";
 import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
@@ -14,6 +15,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
 function AppShellLayout() {
+  const { signOut } = useAuth();
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -40,6 +42,14 @@ function AppShellLayout() {
               {"User guide"}
             </NavLink>
           </nav>
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="ml-auto text-sm font-medium"
+            style={{ color: "var(--brand-fg-muted)" }}
+          >
+            {"Sign out"}
+          </button>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
@@ -51,14 +61,22 @@ function AppShellLayout() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<AppShellLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/claim" element={<Claim />} />
-        <Route path="/help" element={<Help />} />
-      </Route>
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="*" element={<Navigate to="/sign-in" replace />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route
+          element={
+            <RequireAuth>
+              <AppShellLayout />
+            </RequireAuth>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/claim" element={<Claim />} />
+          <Route path="/help" element={<Help />} />
+        </Route>
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }
