@@ -43,14 +43,20 @@ describe("App", () => {
 
   it("[AC-019] renders the shell when /me succeeds", async () => {
     setSessionToken("t");
-    vi.stubGlobal("fetch", vi.fn(() => reply(200, user)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => reply(200, user)),
+    );
     mount("/dashboard");
     expect((await screen.findAllByText("My claims")).length).toBeGreaterThan(0);
   });
 
   it("[AC-022] a 401 from /me goes to sign-in with a notice", async () => {
     setSessionToken("t");
-    vi.stubGlobal("fetch", vi.fn(() => reply(401, { detail: "x" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => reply(401, { detail: "x" })),
+    );
     mount("/dashboard");
     expect(await screen.findByText("Please sign in again")).toBeInTheDocument();
     expect(getSessionToken()).toBeNull();
@@ -74,7 +80,10 @@ describe("App", () => {
   });
 
   it("[AC-018] shows one generic message on 401", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => reply(401, { detail: "Invalid email or password" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => reply(401, { detail: "Invalid email or password" })),
+    );
     mount("/sign-in");
     await userEvent.type(screen.getByPlaceholderText("Email"), "p@example.com");
     await userEvent.type(screen.getByPlaceholderText("Password"), "pw");
