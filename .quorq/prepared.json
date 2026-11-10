@@ -1,0 +1,54 @@
+{
+  "key": {
+    "app_design_id": "19759b21-52e5-4462-8bfd-8929cdccee1c",
+    "app_design_version": 1,
+    "architecture_document_id": "5ee77781-1cae-44d1-a961-665fae3befe1",
+    "architecture_version": 1
+  },
+  "outcome": "prepared",
+  "packages": [
+    {
+      "ecosystem": "pypi",
+      "installed_version": "1.43.127",
+      "name": "boto3",
+      "status": "installed",
+      "version": ">=1.34"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "0.0.33",
+      "name": "python-multipart",
+      "status": "installed",
+      "version": ">=0.0.9"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "25.1.0",
+      "name": "argon2-cffi",
+      "status": "installed",
+      "version": ">=23.1.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2.3.0",
+      "name": "email-validator",
+      "status": "installed",
+      "version": ">=2.1"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "react-router",
+      "status": "skipped",
+      "version": ">=7"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "@tanstack/react-query",
+      "status": "skipped",
+      "version": ">=5"
+    }
+  ],
+  "prepared_by_run": "ccb58201-7515-47e9-a8dd-61d3828dffae"
+}

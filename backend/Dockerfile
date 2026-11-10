@@ -7,6 +7,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
+COPY alembic.ini ./
+COPY migrations ./migrations
 
 # Run as an unprivileged user. The service never needs root, and a container that
 # drops it limits what a compromise of the app can do to the host.

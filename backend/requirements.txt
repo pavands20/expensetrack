@@ -3,6 +3,7 @@ uvicorn[standard]==0.32.0
 sqlalchemy==2.0.35
 pydantic==2.9.2
 psycopg[binary]==3.2.3
+alembic==1.14.0
 
 # Checks. The platform installs and runs this file before it reports that the
 # generated tests pass, so the test dependencies belong here rather than in a
@@ -13,3 +14,10 @@ pytest>=8.3
 # back to show on the development dashboard.
 pytest-cov>=5.0
 ruff>=0.6
+
+# BEGIN QUORQ ARCHITECTURE PACKAGES
+argon2-cffi>=23.1.0
+boto3>=1.34
+email-validator>=2.1
+python-multipart>=0.0.9
+# END QUORQ ARCHITECTURE PACKAGES
