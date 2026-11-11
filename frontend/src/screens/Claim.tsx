@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch, ApiError } from "@/lib/api";
 import { brand } from "@/lib/brand";
 import { Icons } from "@/lib/icons";
+import { LineEditor } from "@/components/LineEditor";
 import { ReceiptControl } from "@/components/ReceiptControl";
 import { SubmitClaim } from "@/components/SubmitClaim";
 
@@ -349,6 +350,7 @@ export default function Screen() {
                     Amount (GBP)
                   </th>
                   <th scope="col">Description</th>
+                  {!locked && <th scope="col">Actions</th>}
                   <th scope="col">Receipt</th>
                 </tr>
               </thead>
@@ -372,6 +374,17 @@ export default function Screen() {
                       {gbp(l.amount_gbp)}
                     </td>
                     <td style={{ maxWidth: 280 }}>{l.description}</td>
+                    {!locked && (
+                      <td>
+                        <LineEditor
+                          claimId={claim!.id}
+                          line={l}
+                          lineCount={lines.length}
+                          categories={categories}
+                          onClaimChange={(c) => setClaim(c as ClaimData)}
+                        />
+                      </td>
+                    )}
                     <td>
                       {missing.includes(l.id) && <strong>Receipt missing</strong>}
                       <ReceiptControl
