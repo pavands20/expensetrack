@@ -9,26 +9,50 @@ OpenAPI document and passes its tests before a single handler is implemented.
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, engine
+from alembic import command
+from app import models  # noqa: F401 -- imported so the tables register
+from app.database import SessionLocal
+from app.models import User
+from app.routers import auth, users
+from app.security import hash_password
+
+_BACKEND = Path(__file__).resolve().parent.parent
+
+
+def _seed_admin() -> None:
+    """Create the first Finance user from the bootstrap settings, once."""
+    email = os.getenv("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
+    password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
+    if not email or not password:
+        return
+    with SessionLocal() as db:
+        if db.scalar(select(User).where(User.email == email)) is None:
+            db.add(
+                User(
+                    name="Finance Admin",
+                    email=email,
+                    password_hash=hash_password(password),
+                    role="Finance",
+                    is_active=True,
+                )
+            )
+            db.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """The scaffold ships no migrations, so the tables are created from the models
-    when the application starts. Replace this with Alembic before anything holds data
-    worth keeping.
-
-    This runs on startup and not at import, so importing the application never opens a
-    connection. A test can therefore point `get_db` at a database of its own, and a
-    deployment whose `DATABASE_URL` names a server that is not up fails where you can
-    read the error, not while pytest collects the files.
-    """
-    Base.metadata.create_all(bind=engine)
+    """Migrate to head, then seed. Runs on startup, never at import."""
+    cfg = Config(str(_BACKEND / "alembic.ini"))
+    cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
+    command.upgrade(cfg, "head")
+    _seed_admin()
     yield
 
 
@@ -54,10 +78,12 @@ _allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins or _dev_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth.router)
+app.include_router(users.router)
 
 
 @app.get("/health")
