@@ -1,7 +1,8 @@
 """Finance-only user administration."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -20,7 +21,9 @@ def list_users(db: Session = Depends(get_db)) -> list[User]:
 
 
 @router.post("", status_code=201, response_model=UserOut)
-def create_user(body: UserCreateIn, db: Session = Depends(get_db)) -> User:
+def create_user(
+    body: UserCreateIn, background: BackgroundTasks, db: Session = Depends(get_db)
+) -> User:
     email = body.email.lower()
     if db.scalar(select(User).where(func.lower(User.email) == email)) is not None:
         raise HTTPException(status_code=409, detail="A user with this email already exists")
@@ -35,9 +38,15 @@ def create_user(body: UserCreateIn, db: Session = Depends(get_db)) -> User:
         is_active=True,
     )
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409, detail="A user with this email already exists"
+        ) from None
     if body.initial_password is None:
-        send_reset_email(db, user)
+        send_reset_email(db, user, background)
     return user
 
 

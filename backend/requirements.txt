@@ -6,6 +6,8 @@ psycopg[binary]==3.2.3
 argon2-cffi==23.1.0
 email-validator==2.2.0
 alembic==1.13.3
+boto3==1.35.36
+python-multipart==0.0.12
 
 # Checks. The platform installs and runs this file before it reports that the
 # generated tests pass, so the test dependencies belong here rather than in a

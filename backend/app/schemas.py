@@ -1,8 +1,10 @@
 """Pydantic request and response models."""
 
-from typing import Literal
+import datetime as dt
+from decimal import Decimal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints
 
 
 class UserOut(BaseModel):
@@ -59,3 +61,60 @@ class UserPatchIn(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     role: Role | None = None
     manager_id: int | None = None
+
+
+CategoryName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=60)]
+Limit = Annotated[Decimal, Field(gt=0, max_digits=8, decimal_places=2)]
+
+
+class ClaimCreateIn(BaseModel):
+    title: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] | None = None
+
+
+class LineIn(BaseModel):
+    date: dt.date
+    category_id: int
+    amount_gbp: Annotated[Decimal, Field(gt=0, max_digits=10, decimal_places=2)]
+    description: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=140)
+    ]
+
+
+class LineOut(BaseModel):
+    id: int
+    date: str
+    category_id: int
+    category_name: str
+    category_is_active: bool
+    amount_gbp: str
+    description: str
+
+
+class ClaimOut(BaseModel):
+    id: int
+    reference: str
+    title: str | None
+    status: str
+    owner_id: int
+    owner_name: str
+    created_at: str
+    lines: list[LineOut]
+    total_gbp: str
+
+
+class CategoryOut(BaseModel):
+    id: int
+    name: str
+    limit_gbp: str | None
+    is_active: bool
+
+
+class CategoryCreateIn(BaseModel):
+    name: CategoryName
+    limit_gbp: Limit | None = None
+
+
+class CategoryPatchIn(BaseModel):
+    name: CategoryName | None = None
+    limit_gbp: Limit | None = None
+    is_active: bool | None = None

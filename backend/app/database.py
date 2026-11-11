@@ -1,10 +1,7 @@
 """Engine, session factory and the request-scoped session dependency.
 
-SQLite by default so a fresh clone runs with nothing but `pip install -r
-requirements.txt` -- the approved architecture may name Postgres or MySQL, but
-naming one is not the same as having one, and a scaffold that cannot start
-without a database server is a scaffold nobody runs. Point `DATABASE_URL` at
-the real thing when it exists; nothing else has to change.
+PostgreSQL is the project database: set `DATABASE_URL`. The SQLite default is
+only a local convenience and must not be relied on in a deployment.
 """
 
 import os

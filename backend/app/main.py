@@ -1,9 +1,7 @@
 """Application entrypoint.
 
-Generated from the approved architecture: one router per component that owns
-endpoints, one route per endpoint the API spec declares. Every generated route
-is a stub that returns a typed placeholder, so the service starts, serves its
-OpenAPI document and passes its tests before a single handler is implemented.
+One router per component that owns endpoints (auth, users, categories,
+claims), plus the /health liveness probe.
 """
 
 import os
@@ -20,8 +18,9 @@ from alembic import command
 from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
-from app.routers import auth, users
+from app.routers import auth, categories, claims, users
 from app.security import hash_password
+from app.services.categories import seed_categories
 
 _BACKEND = Path(__file__).resolve().parent.parent
 
@@ -53,6 +52,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
     command.upgrade(cfg, "head")
     _seed_admin()
+    seed_categories()
     yield
 
 
@@ -84,9 +84,11 @@ app.add_middleware(
 )
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(categories.router)
+app.include_router(claims.router)
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness probe, and the only route here that is not a stub."""
+    """Liveness probe."""
     return {"status": "ok"}

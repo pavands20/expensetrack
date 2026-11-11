@@ -3,7 +3,7 @@
 import os
 from datetime import timedelta
 
-from fastapi import HTTPException
+from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
@@ -30,29 +30,41 @@ def check_manager(db: Session, manager_id: int | None, user_id: int | None = Non
         raise HTTPException(status_code=422, detail="Invalid manager")
 
 
-def send_reset_email(db: Session, user: User) -> None:
-    token = new_token()
+def reset_minutes() -> int:
     try:
-        minutes = int(os.getenv("RESET_TOKEN_MINUTES", "60"))
+        return int(os.getenv("RESET_TOKEN_MINUTES", "60"))
     except ValueError:
-        minutes = 60
-    db.add(
-        PasswordResetToken(
-            user_id=user.id,
-            token_hash=hash_token(token),
-            expires_at=utcnow() + timedelta(minutes=minutes),
-        )
-    )
-    db.commit()
+        return 60
+
+
+def frontend_base_url() -> str:
     base = os.getenv("FRONTEND_BASE_URL", "").strip()
     if not base:
         origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
         base = origins[0] if origins else "http://localhost:5173"
-    send_email(
-        user.email,
-        "Set your password",
-        f"Set your password: {base}/reset-password?token={token}",
+    return base.rstrip("/")
+
+
+def create_reset_link(db: Session, user: User) -> str:
+    """Store a fresh reset token (hash only) and return the link carrying it."""
+    token = new_token()
+    db.add(
+        PasswordResetToken(
+            user_id=user.id,
+            token_hash=hash_token(token),
+            expires_at=utcnow() + timedelta(minutes=reset_minutes()),
+        )
     )
+    db.commit()
+    return f"{frontend_base_url()}/reset-password?token={token}"
+
+
+def send_reset_email(
+    db: Session, user: User, background: BackgroundTasks, subject: str = "Set your password"
+) -> None:
+    """Create the link now; deliver the email after the response is sent."""
+    link = create_reset_link(db, user)
+    background.add_task(send_email, user.email, subject, f"{subject}: {link}")
 
 
 def revoke_access(db: Session, user_id: int) -> None:
