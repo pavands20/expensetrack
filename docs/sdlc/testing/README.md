@@ -3,49 +3,46 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
+### TEST-CHECKS-01 · draft · source: testing:run_checks
+
+An automated check run, not tied to any ticket, passed all 7 checks.
+
+- Step: run_checks
+- Ticket: none
+- Status: succeeded
+- Result: 7/7 checks passed
+- Not stated in input: which checks were run (e.g. lint, type, unit, build), run date, or who triggered or reviewed the run.
+- Requirement coverage: not provided, so no US-xxx links are recorded.
+
 ### TEST-WRITE-1ebd5321 · draft · source: testing:write_tests:1ebd5321-a7b6-45dc-a309-0adae735e5da
 
-Automated test authoring for ticket 1ebd5321-a7b6-45dc-a309-0adae735e5da succeeded and produced 3 test files. The input does not identify the files, their contents or the requirements they cover.
+Automated tests were written for ticket 1ebd5321-a7b6-45dc-a309-0adae735e5da, producing 3 test files.
 
-- Activity: write_tests
+- Step: write_tests
 - Ticket: 1ebd5321-a7b6-45dc-a309-0adae735e5da
 - Status: succeeded
-- Result: 3 test file(s)
-
-Not stated in input:
-- File names or paths
-- Test framework
-- Number of test cases
-- Which user stories (US-001 to US-027) are exercised
-- Date of the run
-- Who reviewed or approved the tests
-
-Open traceability gap:
-- The ticket is not mapped to a requirement key in the input, so no US-* links are recorded here.
+- Output: 3 test file(s)
+- Not stated in input: file names, test scope, which user stories the ticket implements, or whether these tests were included in the 7/7 check run.
+- Follow-up: link this ticket to its US-xxx requirement keys once the mapping is available.
 
 **Related:** 1ebd5321-a7b6-45dc-a309-0adae735e5da
 
-### TEST-CHECKS-001 · draft · source: testing:run_checks
+### TEST-E2E-SANDBOX-LATEST · draft · source: testing:e2e:latest
 
-A project-level check run succeeded with 7 of 7 checks passing. It is not tied to any ticket, and the input does not name the individual checks.
+The latest end-to-end test run against the sandbox environment passed 1 of 1 scenarios.
 
-- Activity: run_checks
-- Ticket: none (project-level run)
-- Status: succeeded
-- Result: 7/7 checks passed
-
-Not stated in input:
-- What the 7 checks are (e.g. lint, type checks, unit tests, build)
-- Whether the run includes the 3 test files from TEST-WRITE-1ebd5321
-- Date of the run
-- Environment
-
-Open traceability gaps:
-- Coverage of key business rules is unconfirmed by the input. These rules include:
-  - No self-approval of claims
-  - Claims by Managers and Finance users route to their assigned manager, then Finance (per project clarification)
-  - Submitted claims are read-only
-  - Over-limit line flagging
-  - 5 MB receipt limit
-  - CSV export
+- Run: latest E2E run
+- Target: sandbox
+- Result: passed, 1/1
+- Not stated in input: which user flow the single scenario covers, run date, or build/version under test.
+- Coverage observations (gaps only; no results inferred):
+  - Only one E2E scenario is recorded, against 27 user stories (US-001 to US-027).
+  - There is no recorded evidence of tests for:
+    - the three-role approval chain (Manager, then Finance, then marked paid);
+    - the no-self-approval rule;
+    - the clarified route for claims by Managers and Finance users (assigned manager, then Finance);
+    - receipt size limits (5 MB);
+    - over-limit line flagging;
+    - CSV export.
+  - These gaps are listed for a human to confirm, not as known failures.
 <!-- sdlc:auto:end narrative -->

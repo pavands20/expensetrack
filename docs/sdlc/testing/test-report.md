@@ -3,11 +3,15 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start e2e -->
-**Status:** running
+**Status:** passed
 **Target:** sandbox
 **Date:** 2026-11-11
 
-Passed: — · Failed: — · Skipped: — · Flaky: — · Total: —
+Passed: 1 · Failed: 0 · Skipped: 0 · Flaky: 0 · Total: 1
+
+| Spec | Status |
+|---|---|
+| the app loads | passed |
 <!-- sdlc:auto:end e2e -->
 
 <!-- sdlc:auto:start unit -->
