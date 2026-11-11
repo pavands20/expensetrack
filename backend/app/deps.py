@@ -30,10 +30,10 @@ def _unauthorized() -> HTTPException:
     return HTTPException(status_code=401, detail="Not authenticated")
 
 
-def current_session(
+def _authenticated(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: Session = Depends(get_db),
-) -> UserSession:
+) -> tuple[UserSession, User]:
     if creds is None or not creds.credentials:
         raise _unauthorized()
     session = db.scalar(
@@ -51,16 +51,15 @@ def current_session(
         raise _unauthorized()
     session.last_seen_at = now
     db.commit()
-    return session
+    return session, user
 
 
-def require_auth(
-    session: UserSession = Depends(current_session), db: Session = Depends(get_db)
-) -> User:
-    user = db.get(User, session.user_id)
-    if user is None:
-        raise _unauthorized()
-    return user
+def current_session(auth: tuple[UserSession, User] = Depends(_authenticated)) -> UserSession:
+    return auth[0]
+
+
+def require_auth(auth: tuple[UserSession, User] = Depends(_authenticated)) -> User:
+    return auth[1]
 
 
 def require_finance(user: User = Depends(require_auth)) -> User:

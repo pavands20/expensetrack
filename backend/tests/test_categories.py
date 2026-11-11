@@ -51,13 +51,22 @@ def test_ac072_seed_and_idempotent(db_session):
     assert got == {"Trips": True, "Meals": False, "Equipment": True, "Other": True}
 
 
-def test_ac072_lifespan_calls_seed():
-    import inspect
+def test_ac072_lifespan_calls_seed(monkeypatch):
+    import asyncio
 
     from app import main
 
-    src = inspect.getsource(main.lifespan)
-    assert src.index("_seed_admin()") < src.index("seed_categories()")
+    calls = []
+    monkeypatch.setattr(main.command, "upgrade", lambda *a, **k: calls.append("upgrade"))
+    monkeypatch.setattr(main, "_seed_admin", lambda: calls.append("admin"))
+    monkeypatch.setattr(main, "seed_categories", lambda: calls.append("categories"))
+
+    async def run():
+        async with main.lifespan(main.app):
+            pass
+
+    asyncio.run(run())
+    assert calls == ["upgrade", "admin", "categories"]
 
 
 def test_ac073_limit_set_clear_and_invalid(client, fin):

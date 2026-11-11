@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app import storage
 from app.database import get_db
 from app.deps import require_auth
-from app.models import Category, Claim, ClaimLine, User
+from app.models import Category, Claim, ClaimLine, User, utcnow
 from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut
 from app.services.users import direct_reports
 
@@ -102,6 +102,7 @@ def add_line(
                 }
             ],
         )
+    claim.updated_at = utcnow()
     db.add(
         ClaimLine(
             claim_id=claim.id,

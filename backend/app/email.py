@@ -7,14 +7,14 @@ from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
-# Tests read this to see what was sent; it is cleared by the test, never by the app.
+# Only filled when SMTP_HOST is unset (tests, laptop), so production never retains bodies.
 outbox: list[dict[str, str]] = []
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    outbox.append({"to": to, "subject": subject, "body": body})
     host = os.getenv("SMTP_HOST", "").strip()
     if not host:
+        outbox.append({"to": to, "subject": subject, "body": body})
         logger.info("SMTP_HOST unset; would send an email with subject %r", subject)
         return
     try:
