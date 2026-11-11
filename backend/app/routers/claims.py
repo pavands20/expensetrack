@@ -11,8 +11,8 @@ from app import storage
 from app.database import get_db
 from app.deps import require_auth
 from app.models import Category, Claim, ClaimLine, User, utcnow
-from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut
-from app.services.users import direct_reports
+from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut, LinePatchIn
+from app.services.claims import visible_claims
 
 router = APIRouter(prefix="/api/claims")
 logger = logging.getLogger(__name__)
@@ -44,6 +44,7 @@ def _out(db: Session, claim: Claim) -> ClaimOut:
                 category_is_active=cat.is_active,
                 amount_gbp=f"{Decimal(ln.amount):.2f}",
                 description=ln.description,
+                has_receipt=bool(ln.receipt_key),
             )
             for ln, cat in rows
         ],
@@ -51,16 +52,18 @@ def _out(db: Session, claim: Claim) -> ClaimOut:
     )
 
 
+def _discard(key: str) -> None:
+    try:
+        storage.delete_object(key)
+    except Exception:
+        logger.exception("Failed to delete receipt object %r", key)
+
+
 def _visible_claim(db: Session, claim_id: int, user: User) -> Claim:
-    claim = db.get(Claim, claim_id)
-    if claim is not None:
-        if (
-            claim.owner_id == user.id
-            or user.role == "Finance"
-            or claim.owner_id in {r.id for r in direct_reports(db, user.id)}
-        ):
-            return claim
-    raise HTTPException(status_code=404, detail="Claim not found")
+    claim = db.scalar(visible_claims(db, user).where(Claim.id == claim_id))
+    if claim is None:
+        raise HTTPException(status_code=404, detail="Claim not found")
+    return claim
 
 
 def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
@@ -70,6 +73,13 @@ def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
     if claim.status != "draft":
         raise HTTPException(status_code=409, detail=message)
     return claim
+
+
+@router.get("", response_model=list[ClaimOut])
+def list_claims(
+    user: User = Depends(require_auth), db: Session = Depends(get_db)
+) -> list[ClaimOut]:
+    return [_out(db, c) for c in db.scalars(visible_claims(db, user))]
 
 
 @router.post("", status_code=201, response_model=ClaimOut)
@@ -116,6 +126,71 @@ def add_line(
     return _out(db, claim)
 
 
+def _claim_line(db: Session, claim_id: int, line_id: int) -> ClaimLine:
+    line = db.scalar(
+        select(ClaimLine).where(ClaimLine.id == line_id, ClaimLine.claim_id == claim_id)
+    )
+    if line is None:
+        raise HTTPException(status_code=404, detail="Line not found")
+    return line
+
+
+@router.patch("/{claim_id}/lines/{line_id}", response_model=ClaimOut)
+def patch_line(
+    claim_id: int,
+    line_id: int,
+    body: LinePatchIn,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+) -> ClaimOut:
+    claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
+    line = _claim_line(db, claim_id, line_id)
+    if body.category_id is not None and body.category_id != line.category_id:
+        cat = db.get(Category, body.category_id)
+        if cat is None or not cat.is_active:
+            raise HTTPException(
+                status_code=422,
+                detail=[
+                    {
+                        "loc": ["body", "category_id"],
+                        "msg": "Unknown or retired category",
+                        "type": "value_error",
+                    }
+                ],
+            )
+        line.category_id = cat.id
+    if body.date is not None:
+        line.date = body.date
+    if body.amount_gbp is not None:
+        line.amount = body.amount_gbp
+    if body.description is not None:
+        line.description = body.description
+    claim.updated_at = utcnow()
+    db.commit()
+    return _out(db, claim)
+
+
+@router.delete("/{claim_id}/lines/{line_id}", response_model=ClaimOut)
+def delete_line(
+    claim_id: int,
+    line_id: int,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+) -> ClaimOut:
+    claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
+    line = _claim_line(db, claim_id, line_id)
+    count = len(list(db.scalars(select(ClaimLine.id).where(ClaimLine.claim_id == claim.id))))
+    if count <= 1:
+        raise HTTPException(status_code=409, detail="A claim needs at least one line")
+    key = line.receipt_key
+    db.delete(line)
+    claim.updated_at = utcnow()
+    db.commit()
+    if key:
+        _discard(key)
+    return _out(db, claim)
+
+
 @router.get("/{claim_id}", response_model=ClaimOut)
 def get_claim(
     claim_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)
@@ -137,8 +212,5 @@ def delete_claim(
     db.delete(claim)
     db.commit()
     for key in keys:
-        try:
-            storage.delete_object(key)
-        except Exception:
-            logger.exception("Failed to delete receipt object %r", key)
+        _discard(key)
     return Response(status_code=204)

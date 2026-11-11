@@ -4,7 +4,7 @@ import datetime as dt
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, model_validator
 
 
 class UserOut(BaseModel):
@@ -80,6 +80,24 @@ class LineIn(BaseModel):
     ]
 
 
+class LinePatchIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    date: dt.date | None = None
+    category_id: int | None = None
+    amount_gbp: Annotated[Decimal, Field(gt=0, max_digits=10, decimal_places=2)] | None = None
+    description: (
+        Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=140)]
+        | None
+    ) = None
+
+    @model_validator(mode="after")
+    def _at_least_one(self) -> "LinePatchIn":
+        if all(getattr(self, f) is None for f in type(self).model_fields):
+            raise ValueError("At least one field is required")
+        return self
+
+
 class LineOut(BaseModel):
     id: int
     date: str
@@ -88,6 +106,7 @@ class LineOut(BaseModel):
     category_is_active: bool
     amount_gbp: str
     description: str
+    has_receipt: bool = False
 
 
 class ClaimOut(BaseModel):

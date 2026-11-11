@@ -18,7 +18,7 @@ from alembic import command
 from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
-from app.routers import auth, categories, claims, users
+from app.routers import approvals, auth, categories, claims, receipts, users
 from app.security import hash_password
 from app.services.categories import seed_categories
 
@@ -86,6 +86,8 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(categories.router)
 app.include_router(claims.router)
+app.include_router(receipts.router)
+app.include_router(approvals.router)
 
 
 @app.get("/health")
