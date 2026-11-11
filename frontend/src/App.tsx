@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import { apiFetch, clearSessionToken, setUnauthorizedHandler } from "@/lib/api";
-import { RequireAuth } from "@/lib/auth";
+import { RequireAuth, useCurrentUser } from "@/lib/auth";
 import { Icons } from "@/lib/icons";
 import ResetPassword from "@/screens/ResetPassword";
 import SignIn from "@/screens/SignIn";
@@ -10,7 +10,6 @@ import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
 import Help from "@/screens/Help";
 import Users from "@/screens/Users";
-import { useCurrentUser } from "@/lib/auth";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
