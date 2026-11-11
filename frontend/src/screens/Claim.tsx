@@ -5,6 +5,7 @@ import { apiFetch, ApiError } from "@/lib/api";
 import { brand } from "@/lib/brand";
 import { Icons } from "@/lib/icons";
 import { ReceiptControl } from "@/components/ReceiptControl";
+import { SubmitClaim } from "@/components/SubmitClaim";
 
 type Line = {
   id: number;
@@ -91,6 +92,7 @@ export default function Screen() {
   const [busy, setBusy] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState("");
+  const [missing, setMissing] = React.useState<number[]>([]);
 
   const dateRef = React.useRef<HTMLInputElement>(null);
   const cancelRef = React.useRef<HTMLButtonElement>(null);
@@ -136,7 +138,7 @@ export default function Screen() {
 
   const locked = claim !== null && claim.status !== "draft";
   const statusLabel = claim
-    ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1)
+    ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1).replace(/_/g, " ")
     : "Draft";
   const lines = claim?.lines ?? [];
 
@@ -371,6 +373,7 @@ export default function Screen() {
                     </td>
                     <td style={{ maxWidth: 280 }}>{l.description}</td>
                     <td>
+                      {missing.includes(l.id) && <strong>Receipt missing</strong>}
                       <ReceiptControl
                         claimId={claim!.id}
                         lineId={l.id}
@@ -511,6 +514,9 @@ export default function Screen() {
                   <Icons.Trash className="w-4 h-4" aria-hidden="true" />
                   Delete draft
                 </button>
+              </div>
+              <div className="c6">
+                <SubmitClaim claim={claim} onSubmitted={setClaim} onMissing={setMissing} />
               </div>
             </div>
           </>
