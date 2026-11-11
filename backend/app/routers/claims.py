@@ -44,6 +44,7 @@ def _out(db: Session, claim: Claim) -> ClaimOut:
                 category_is_active=cat.is_active,
                 amount_gbp=f"{Decimal(ln.amount):.2f}",
                 description=ln.description,
+                has_receipt=bool(ln.receipt_key),
             )
             for ln, cat in rows
         ],

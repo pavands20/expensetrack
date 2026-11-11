@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch, ApiError } from "@/lib/api";
 import { brand } from "@/lib/brand";
 import { Icons } from "@/lib/icons";
+import { ReceiptControl } from "@/components/ReceiptControl";
 
 type Line = {
   id: number;
@@ -13,6 +14,7 @@ type Line = {
   category_is_active: boolean;
   amount_gbp: string;
   description: string;
+  has_receipt?: boolean;
 };
 type ClaimData = {
   id: number;
@@ -345,12 +347,13 @@ export default function Screen() {
                     Amount (GBP)
                   </th>
                   <th scope="col">Description</th>
+                  <th scope="col">Receipt</th>
                 </tr>
               </thead>
               <tbody>
                 {lines.length === 0 && (
                   <tr>
-                    <td colSpan={4} style={{ padding: "48px 16px", textAlign: "center" }}>
+                    <td colSpan={5} style={{ padding: "48px 16px", textAlign: "center" }}>
                       <p style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
                         No lines on this claim yet
                       </p>
@@ -367,6 +370,15 @@ export default function Screen() {
                       {gbp(l.amount_gbp)}
                     </td>
                     <td style={{ maxWidth: 280 }}>{l.description}</td>
+                    <td>
+                      <ReceiptControl
+                        claimId={claim!.id}
+                        lineId={l.id}
+                        hasReceipt={Boolean(l.has_receipt)}
+                        locked={locked}
+                        onUpdated={(c) => setClaim(c as ClaimData)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -88,6 +88,7 @@ class LineOut(BaseModel):
     category_is_active: bool
     amount_gbp: str
     description: str
+    has_receipt: bool = False
 
 
 class ClaimOut(BaseModel):
