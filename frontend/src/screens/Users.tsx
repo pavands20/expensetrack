@@ -4,7 +4,20 @@ import { QueryClient, QueryClientProvider, useMutation, useQuery } from "@tansta
 
 import { apiFetch, ApiError } from "@/lib/api";
 import { useCurrentUser } from "@/lib/auth";
-import { Badge, Button, Card, Input, Label, Select, Table, TBody, TD, TH, THead, TR } from "@/lib/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Input,
+  Label,
+  Select,
+  Table,
+  TBody,
+  TD,
+  TH,
+  THead,
+  TR,
+} from "@/lib/ui";
 
 type Role = "Employee" | "Manager" | "Finance";
 type AdminUser = {
@@ -91,7 +104,13 @@ function CreateForm({ users, onDone }: { users: AdminUser[]; onDone: () => void 
       >
         <h2 className="font-semibold">Create user</h2>
         <Label htmlFor="new-name">Name</Label>
-        <Input id="new-name" data-testid="new-name" required value={name} onChange={(e) => setName(e.target.value)} />
+        <Input
+          id="new-name"
+          data-testid="new-name"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <Label htmlFor="new-email">Email</Label>
         <Input
           id="new-email"
@@ -177,7 +196,13 @@ function EditForm({
       >
         <h2 className="font-semibold">Edit {target.name}</h2>
         <Label htmlFor="edit-name">Name</Label>
-        <Input id="edit-name" data-testid="edit-name" required value={name} onChange={(e) => setName(e.target.value)} />
+        <Input
+          id="edit-name"
+          data-testid="edit-name"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <Label htmlFor="edit-role">Role</Label>
         <Select
           id="edit-role"
@@ -225,7 +250,8 @@ function UsersAdmin() {
     retry: false,
   });
   const deactivate = useMutation({
-    mutationFn: (id: number) => apiFetch<AdminUser>(`/api/users/${id}/deactivate`, { method: "POST" }),
+    mutationFn: (id: number) =>
+      apiFetch<AdminUser>(`/api/users/${id}/deactivate`, { method: "POST" }),
     onSuccess: () => {
       setConfirmId(null);
       return list.refetch();
