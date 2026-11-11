@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-76 tests · Passed 58 · Failed 0 · Skipped 0 · Not run 18
+149 tests · Passed 121 · Failed 0 · Skipped 0 · Not run 28
 
-Acceptance criteria covered: 27/102 · passing: 11/102
+Acceptance criteria covered: 44/102 · passing: 18/102
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -110,6 +110,101 @@ Acceptance criteria covered: 27/102 · passing: 11/102
 | AC-074 | [AC-074][NFR-011] retired category hidden from Employee list but kept for Finance | E2E | Not run yet | `frontend/e2e/categories.spec.ts` |
 | AC-075 | [AC-075][NFR-004] Employee gets 403 on POST/PATCH and has no Categories nav link | E2E | Not run yet | `frontend/e2e/categories.spec.ts` |
 | AC-076 | [AC-076] duplicate names, including different case, are refused | E2E | Not run yet | `frontend/e2e/categories.spec.ts` |
+
+## Sprint 3
+
+### US-004: Role-based visibility of claims
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-013 | test_ac013_employee_sees_only_own | Integration | Passed | `backend/tests/test_visibility.py` |
+| AC-014 | test_ac014_manager_sees_own_and_reports | Integration | Passed | `backend/tests/test_visibility.py` |
+| AC-015 | test_ac015_finance_sees_all_including_inactive | Integration | Passed | `backend/tests/test_visibility.py` |
+| AC-016 | test_ac016_manager_by_id_non_report_404 | Integration | Passed | `backend/tests/test_visibility.py` |
+| — | test_nfr004_list_requires_auth | Integration | Passed | `backend/tests/test_visibility.py` |
+| AC-013 | test_ac013_employee_own_only_and_404_other | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+| AC-013 | test_ac013_unauthenticated_401 | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+| AC-014 | test_ac014_manager_own_and_report_only | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+| AC-015 | test_ac015_finance_all_including_deactivated | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+| AC-016 | test_ac016_manager_non_report_404_reveals_nothing | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+| — | test_nfr004_employee_cannot_use_finance_endpoints | Integration | Passed | `backend/tests/test_visibility_qa.py` |
+
+### US-009: Edit a draft claim
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-032 | LineEditor > [AC-032] a 422 maps onto the field | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-032 | LineEditor > [AC-032] a retired current category stays selectable | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-032 | LineEditor > [AC-032] edit saves via PATCH and shows stored values and total | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-032 | LineEditor > [AC-032] validation errors show next to the field and no PATCH is sent | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-033 | LineEditor > [AC-033] remove with confirm deletes the line and updates the total | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-033 | LineEditor > [AC-033] the only line cannot be removed and shows the hint | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-034 | LineEditor > [AC-034] a 409 shows the locked message | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-034 | LineEditor > [AC-034] a non-draft claim renders no edit or remove controls | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-035 | LineEditor > [AC-035] a 403 shows the own-claims message | Unit | Passed | `frontend/src/components/LineEditor.test.tsx` |
+| AC-032 | test_ac032_patch_changes_fields_and_total | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-032 | test_ac032_retired_category_rules | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-032 | test_ac032_validation_and_category | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-033 | test_ac033_delete_failure_logged_and_only_line_409 | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-033 | test_ac033_delete_line_removes_receipt | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-034 | test_ac034_non_draft_409_changes_nothing | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-035 | test_ac035_ownership_403_404 | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| — | test_line_of_other_claim_404_and_updated_at | Integration | Passed | `backend/tests/test_claim_lines.py` |
+| AC-032 | [AC-032] edit a draft line and see new values and total after reload | E2E | Not run yet | `frontend/e2e/claim-lines.spec.ts` |
+| AC-033 | [AC-033] remove one of two lines drops it and its receipt; only line refused | E2E | Not run yet | `frontend/e2e/claim-lines.spec.ts` |
+| AC-034 | [AC-034] non-draft claim: PATCH/DELETE 409 and no edit controls | E2E | Not run yet | `frontend/e2e/claim-lines.spec.ts` |
+| AC-035 | [AC-035][NFR-004] another user's claim: PATCH/DELETE refused, nothing changes | E2E | Not run yet | `frontend/e2e/claim-lines.spec.ts` |
+
+### US-011: Upload a receipt to a claim line
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-039 | ReceiptControl > [AC-039] View receipt opens the short-lived url in a new tab with noopener | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-039 | ReceiptControl > [AC-039] a highlighted line is marked as missing a receipt | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-039 | ReceiptControl > [AC-039] attaches a receipt via multipart PUT and shows Receipt attached | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-040 | ReceiptControl > [AC-040] rejects a bad type client-side | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-040 | ReceiptControl > [AC-040] rejects an oversize file client-side | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-040 | ReceiptControl > [AC-040] shows the message for a 413 response | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-041 | ReceiptControl > [AC-041] replaces an existing receipt | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-042 | ReceiptControl > [AC-042] a 409 shows the locked message | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-042 | ReceiptControl > [AC-042] locked claims render no upload or replace controls but can view | Unit | Passed | `frontend/src/components/ReceiptControl.test.tsx` |
+| AC-039 | test_ac039_upload_sets_has_receipt | Integration | Passed | `backend/tests/test_receipts.py` |
+| AC-040 | test_ac040_rejects_bad_files | Integration | Passed | `backend/tests/test_receipts.py` |
+| AC-041 | test_ac041_replace_deletes_old | Integration | Passed | `backend/tests/test_receipts.py` |
+| AC-042 | test_ac042_non_draft_conflict | Integration | Passed | `backend/tests/test_receipts.py` |
+| — | test_nfr004_put_owner_only | Integration | Passed | `backend/tests/test_receipts.py` |
+| — | test_nfr006_local_signed_link | Integration | Passed | `backend/tests/test_receipts.py` |
+| — | test_nfr006_s3_branch | Integration | Passed | `backend/tests/test_receipts.py` |
+| AC-040 | test_ac040_txt_and_oversize_rejected_no_receipt | Integration | Passed | `backend/tests/test_receipts_qa.py` |
+| AC-041 | test_ac041_replacement_url_points_to_new_file | Integration | Passed | `backend/tests/test_receipts_qa.py` |
+| AC-042 | test_ac042_locked_claim_409_upload_and_replace | Integration | Passed | `backend/tests/test_receipts_qa.py` |
+| — | test_nfr006_invisible_claim_url_404_and_unauth_401 | Integration | Passed | `backend/tests/test_receipts_qa.py` |
+| — | test_nfr007_exact_5mb_passes_and_plus_one_fails | Integration | Passed | `backend/tests/test_receipts_qa.py` |
+| AC-039 | [AC-039] upload a PNG and see Receipt attached | E2E | Not run yet | `frontend/e2e/receipts.spec.ts` |
+| AC-040 | [AC-040] 6 MB file and .txt are rejected with the message, no receipt | E2E | Not run yet | `frontend/e2e/receipts.spec.ts` |
+
+### US-013: Submit a claim and lock it
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-043 | SubmitClaim > [AC-043] a 422 marks the lines missing a receipt | Unit | Passed | `frontend/src/components/SubmitClaim.test.tsx` |
+| AC-048 | SubmitClaim > [AC-048] a 409 shows the already submitted message | Unit | Passed | `frontend/src/components/SubmitClaim.test.tsx` |
+| AC-048 | SubmitClaim > [AC-048] other failures show the generic message | Unit | Passed | `frontend/src/components/SubmitClaim.test.tsx` |
+| AC-048 | SubmitClaim > [AC-048] submits and shows the new status and locked state | Unit | Passed | `frontend/src/components/SubmitClaim.test.tsx` |
+| AC-049 | SubmitClaim > [AC-049] an empty claim shows the message and submits nothing | Unit | Passed | `frontend/src/components/SubmitClaim.test.tsx` |
+| AC-043 | test_ac043_missing_receipts_listed | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-048 | test_ac048_submit_locks_claim | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-049 | test_ac049_no_lines_422 | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-050 | test_ac050_manager_queue | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-051 | test_ac051_finance_own_claim_not_in_own_queue | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-051 | test_ac051_inactive_manager_goes_to_finance | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-051 | test_ac051_no_manager_goes_to_finance | Integration | Passed | `backend/tests/test_submit.py` |
+| — | test_nfr004_submit_access | Integration | Passed | `backend/tests/test_submit.py` |
+| — | test_queue_rules_employee_403_newest_first | Integration | Passed | `backend/tests/test_submit.py` |
+| AC-048 | [AC-048] submit locks the claim in the UI and the API returns 409 on edits | E2E | Not run yet | `frontend/e2e/submit.spec.ts` |
+| AC-049 | [AC-049] submitting a claim with no lines is refused and stays a draft | E2E | Not run yet | `frontend/e2e/submit.spec.ts` |
+| AC-050 | [AC-050] Employee with a manager: claim is in manager queue, not Finance's | E2E | Not run yet | `frontend/e2e/submit.spec.ts` |
+| AC-051 | [AC-051] no manager: Finance other than owner sees it; owner does not | E2E | Not run yet | `frontend/e2e/submit.spec.ts` |
 
 ## Project setup
 
