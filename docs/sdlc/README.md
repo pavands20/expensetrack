@@ -9,7 +9,7 @@ Managers and Finance staff also incur expenses. Who should approve a claim submi
 
 Assigned manager, then Finance
 
-**Documentation version:** v8
+**Documentation version:** v9
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -20,7 +20,7 @@ Assigned manager, then Finance
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 31 entries |
 | [Development](development/README.md) | 23 entries |
-| [Testing](testing/README.md) | 0 entries |
+| [Testing](testing/README.md) | 2 entries |
 | [Deployment](deployment/README.md) | 2 entries |
 | [Maintenance](maintenance/README.md) | 0 entries |
 | [Data model](architecture/data-model.md) | generated |
@@ -35,5 +35,5 @@ Assigned manager, then Finance
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 1 release |
 | [Traceability matrix](traceability-matrix.md) | 27 requirements |
-| [Changelog](CHANGELOG.md) | 8 versions |
+| [Changelog](CHANGELOG.md) | 9 versions |
 <!-- sdlc:auto:end contents -->
