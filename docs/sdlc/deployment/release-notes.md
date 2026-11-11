@@ -3,6 +3,16 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 2045c76e01ce — 2026-11-11
+
+**Commit:** `2045c76`
+
+**Delivered:**
+- US-007: Reset a forgotten password by email
+- US-008: Create a draft claim with lines
+- US-010: Delete a draft claim
+- US-019: Finance manages categories and limits
+
 ## e92968354c2c — 2026-11-11
 
 **Commit:** `e929683`
