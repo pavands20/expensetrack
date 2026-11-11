@@ -98,6 +98,7 @@ export default function App() {
         <Route element={<AppShellLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/claim" element={<Claim />} />
+          <Route path="/claims/:id" element={<Claim />} />
           <Route path="/help" element={<Help />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/categories" element={<Categories />} />

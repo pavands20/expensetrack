@@ -1,5 +1,6 @@
 """Pydantic request and response models."""
 
+import datetime as dt
 from decimal import Decimal
 from typing import Annotated, Literal
 
@@ -64,6 +65,41 @@ class UserPatchIn(BaseModel):
 
 CategoryName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=60)]
 Limit = Annotated[Decimal, Field(gt=0, max_digits=8, decimal_places=2)]
+
+
+class ClaimCreateIn(BaseModel):
+    title: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] | None = None
+
+
+class LineIn(BaseModel):
+    date: dt.date
+    category_id: int
+    amount_gbp: Annotated[Decimal, Field(gt=0, max_digits=10, decimal_places=2)]
+    description: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=140)
+    ]
+
+
+class LineOut(BaseModel):
+    id: int
+    date: str
+    category_id: int
+    category_name: str
+    category_is_active: bool
+    amount_gbp: str
+    description: str
+
+
+class ClaimOut(BaseModel):
+    id: int
+    reference: str
+    title: str | None
+    status: str
+    owner_id: int
+    owner_name: str
+    created_at: str
+    lines: list[LineOut]
+    total_gbp: str
 
 
 class CategoryOut(BaseModel):
