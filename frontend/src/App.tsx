@@ -10,6 +10,7 @@ import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
 import Help from "@/screens/Help";
 import Users from "@/screens/Users";
+import Categories from "@/screens/Categories";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -61,6 +62,12 @@ function AppShellLayout() {
                 {"Users"}
               </NavLink>
             )}
+            {currentUser?.role === "Finance" && (
+              <NavLink to="/admin/categories" className={navLinkClass}>
+                <Icons.Settings size={16} />
+                {"Categories"}
+              </NavLink>
+            )}
           </nav>
           <button
             type="button"
@@ -93,6 +100,7 @@ export default function App() {
           <Route path="/claim" element={<Claim />} />
           <Route path="/help" element={<Help />} />
           <Route path="/admin/users" element={<Users />} />
+          <Route path="/admin/categories" element={<Categories />} />
         </Route>
       </Route>
       <Route path="/sign-in" element={<SignIn />} />

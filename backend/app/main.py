@@ -20,8 +20,9 @@ from alembic import command
 from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
-from app.routers import auth, users
+from app.routers import auth, categories, users
 from app.security import hash_password
+from app.services.categories import seed_categories
 
 _BACKEND = Path(__file__).resolve().parent.parent
 
@@ -53,6 +54,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
     command.upgrade(cfg, "head")
     _seed_admin()
+    seed_categories()
     yield
 
 
@@ -84,6 +86,7 @@ app.add_middleware(
 )
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(categories.router)
 
 
 @app.get("/health")

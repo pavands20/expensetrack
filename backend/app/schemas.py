@@ -1,8 +1,9 @@
 """Pydantic request and response models."""
 
-from typing import Literal
+from decimal import Decimal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints
 
 
 class UserOut(BaseModel):
@@ -59,3 +60,25 @@ class UserPatchIn(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     role: Role | None = None
     manager_id: int | None = None
+
+
+CategoryName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=60)]
+Limit = Annotated[Decimal, Field(gt=0, max_digits=8, decimal_places=2)]
+
+
+class CategoryOut(BaseModel):
+    id: int
+    name: str
+    limit_gbp: str | None
+    is_active: bool
+
+
+class CategoryCreateIn(BaseModel):
+    name: CategoryName
+    limit_gbp: Limit | None = None
+
+
+class CategoryPatchIn(BaseModel):
+    name: CategoryName | None = None
+    limit_gbp: Limit | None = None
+    is_active: bool | None = None
