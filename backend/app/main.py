@@ -9,32 +9,62 @@ OpenAPI document and passes its tests before a single handler is implemented.
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, engine
+from alembic import command
+from app import models  # noqa: F401 -- imported so the tables register
+from app.database import SessionLocal
+from app.models import User
+from app.routers import auth, users
+from app.security import hash_password
+
+_BACKEND = Path(__file__).resolve().parent.parent
+
+
+def _seed_admin() -> None:
+    """Create the first Finance user from the bootstrap settings, once."""
+    email = os.getenv("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
+    password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
+    if not email or not password:
+        return
+    with SessionLocal() as db:
+        if db.scalar(select(User).where(User.email == email)) is None:
+            db.add(
+                User(
+                    name="Finance Admin",
+                    email=email,
+                    password_hash=hash_password(password),
+                    role="Finance",
+                    is_active=True,
+                )
+            )
+            db.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """The scaffold ships no migrations, so the tables are created from the models
-    when the application starts. Replace this with Alembic before anything holds data
-    worth keeping.
-
-    This runs on startup and not at import, so importing the application never opens a
-    connection. A test can therefore point `get_db` at a database of its own, and a
-    deployment whose `DATABASE_URL` names a server that is not up fails where you can
-    read the error, not while pytest collects the files.
-    """
-    Base.metadata.create_all(bind=engine)
+    """Migrate to head, then seed. Runs on startup, never at import."""
+    cfg = Config(str(_BACKEND / "alembic.ini"))
+    cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
+    command.upgrade(cfg, "head")
+    _seed_admin()
     yield
 
 
 app = FastAPI(
     title="ExpenseTrack",
-    description="ExpenseTrack handles employee expense claims for a 5\u201350 person company. Roles: Employee, Manager, Finance. No self sign-up \u2014 Finance creates accounts and assigns each employee a manager. Sign-in: email and password, sign-out, and password reset by email. Claims: an employee creates a claim with one or more lines (date, category, amount in GBP, description), attaches a receipt image or PDF per line (up to 5 MB), and submits it. A draft can be edited; a submitted claim cannot. Approval: a manager approves or rejects their direct reports' submitted claims with a comment. Finance then approves or rejects manager-approved claims and marks approved ones paid. Nobody can approve their own claim. Categories: Finance manages categories (Travel, Meals, Equipment, Other), each with an optional per-line limit. Lines over the limit are flagged for the approver. Dashboard: employees see their claims by status. Finance sees totals by category and month, and can export approved claims as CSV. Out of scope: currency conversion, mileage, card feeds, accounting integrations. Stack: React, FastAPI, PostgreSQL, S3 for receipts, on AWS. English only,\n\nManagers and Finance staff also incur expenses. Who should approve a claim submitted by a Manager, or by a Finance user, given nobody can approve their own claim?\n\nAssigned manager, then Finance",
+    description=(
+        "ExpenseTrack handles employee expense claims for a 5\u201350 person company. "
+        "Roles: Employee, Manager, Finance. No self sign-up \u2014 Finance creates accounts "
+        "and assigns each employee a manager. Claims have lines with receipts; managers "
+        "approve their direct reports' claims, then Finance approves and marks them paid. "
+        "Nobody can approve their own claim. Stack: React, FastAPI, PostgreSQL, S3."
+    ),
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -48,10 +78,12 @@ _allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins or _dev_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth.router)
+app.include_router(users.router)
 
 
 @app.get("/health")

@@ -1,10 +1,15 @@
-import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import React from "react";
+import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
+import { apiFetch, clearSessionToken, setUnauthorizedHandler } from "@/lib/api";
+import { RequireAuth, useCurrentUser } from "@/lib/auth";
 import { Icons } from "@/lib/icons";
+import ResetPassword from "@/screens/ResetPassword";
 import SignIn from "@/screens/SignIn";
 import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
 import Help from "@/screens/Help";
+import Users from "@/screens/Users";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -14,6 +19,17 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
 function AppShellLayout() {
+  const navigate = useNavigate();
+  const currentUser = useCurrentUser();
+  async function signOut() {
+    try {
+      await apiFetch<void>("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Still clear the token locally if the server call fails.
+    }
+    clearSessionToken();
+    navigate("/sign-in", { replace: true });
+  }
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -39,7 +55,21 @@ function AppShellLayout() {
               <Icons.Menu size={16} />
               {"User guide"}
             </NavLink>
+            {currentUser?.role === "Finance" && (
+              <NavLink to="/admin/users" className={navLinkClass}>
+                <Icons.Users size={16} />
+                {"Users"}
+              </NavLink>
+            )}
           </nav>
+          <button
+            type="button"
+            data-testid="sign-out"
+            onClick={signOut}
+            className="ml-auto text-sm font-medium"
+          >
+            {"Sign out"}
+          </button>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
@@ -50,14 +80,23 @@ function AppShellLayout() {
 }
 
 export default function App() {
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    setUnauthorizedHandler(() => navigate("/sign-in", { replace: true, state: { expired: true } }));
+    return () => setUnauthorizedHandler(null);
+  }, [navigate]);
   return (
     <Routes>
-      <Route element={<AppShellLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/claim" element={<Claim />} />
-        <Route path="/help" element={<Help />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppShellLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/claim" element={<Claim />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/admin/users" element={<Users />} />
+        </Route>
       </Route>
       <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="*" element={<Navigate to="/sign-in" replace />} />
     </Routes>
   );

@@ -1,54 +1,117 @@
-// @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { apiFetch, ApiError, setSessionToken } from "@/lib/api";
 import { brand } from "@/lib/brand";
-import { useNavigate } from "@/lib/navigate";
 
-const PRODUCT = "ExpenseTrack";
-const SCREEN = "Sign in";
-const mix = (colour, percent) => `color-mix(in srgb, ${colour} ${percent}%, transparent)`;
+type LoginResponse = { token: string };
+
+const glass = {
+  backgroundColor: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  borderRadius: brand.radius,
+};
 
 export default function Screen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const expired = Boolean((location.state as { expired?: boolean } | null)?.expired);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [status, setStatus] = React.useState("");
-  const glass = { backgroundColor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: brand.radius };
-  const glow = `0 20px 60px -10px ${mix(brand.primaryColor, 70)}`;
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const res = await apiFetch<LoginResponse>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      setSessionToken(res.token);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.status !== 401
+          ? "Could not sign in. Please try again."
+          : "Invalid email or password",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const field = "h-12 w-full px-4 text-sm text-white outline-none focus:ring-2";
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white" style={{ fontFamily: brand.fontBody }}>
-      <div aria-hidden className="absolute -left-32 top-[-120px] h-[520px] w-[520px] rounded-full blur-[120px]" style={{ backgroundColor: mix(brand.primaryColor, 70) }} />
-      <div aria-hidden className="absolute bottom-[-160px] right-[-80px] h-[560px] w-[560px] rounded-full blur-[130px]" style={{ backgroundColor: mix(brand.accentColor, 60) }} />
-      <p className="absolute left-10 top-8 text-lg font-bold" style={{ fontFamily: brand.fontHeading }}>{PRODUCT}</p>
-
-      <main className="relative w-full max-w-[420px] p-10 backdrop-blur-2xl" style={{ ...glass, boxShadow: "0 40px 120px -20px rgba(0,0,0,0.6)" }}>
-        <p className="inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: mix(brand.accentColor, 25), color: "#fff" }}>● Live</p>
-        <h1 data-wf="b-0-0" className="mt-5 text-4xl font-extrabold tracking-tight" style={{ fontFamily: brand.fontHeading }}>Sign in to ExpenseTrack</h1>
-        <p className="mt-2 text-sm text-white/65">Jump back in where you left off.</p>
-        {status ? (
-          <p role="status" className="mt-8 p-4 text-sm font-semibold" style={{ ...glass, boxShadow: glow }}>{status}</p>
-        ) : (
-          <form className="mt-8 space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
-            <label htmlFor="tech-email" className="sr-only">Email</label>
-            <input id="tech-email" type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 w-full px-4 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2" style={glass} />
-            <label htmlFor="tech-password" className="sr-only">Password</label>
-            <input id="tech-password" type="password" required placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 w-full px-4 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2" style={glass} />
-            <button data-wf="b-2-0" type="submit" onClick={() => navigate('dashboard')} className="h-12 w-full text-sm font-bold text-white transition-transform hover:scale-[1.02]" style={{ background: `linear-gradient(90deg, ${brand.primaryColor}, ${brand.accentColor})`, borderRadius: brand.radius, boxShadow: glow }}>
-              Sign in →
-            </button>
-          </form>
+    <div
+      className="flex min-h-screen items-center justify-center text-white"
+      style={{ fontFamily: brand.fontBody }}
+    >
+      <main className="w-full max-w-[420px] p-10" style={glass}>
+        <h1 className="text-3xl font-extrabold" style={{ fontFamily: brand.fontHeading }}>
+          Sign in to ExpenseTrack
+        </h1>
+        {expired && (
+          <p role="status" data-testid="session-notice" className="mt-4 text-sm font-semibold">
+            Please sign in again
+          </p>
         )}
-        <div data-wf="b-3-0" className="mt-4 text-center">
-          <button type="button" onClick={() => navigate('help')} className="text-sm font-semibold underline underline-offset-4 outline-none focus-visible:ring-2" style={{ color: brand.primaryColor, borderRadius: 8 }}>Forgot your password?</button>
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          {["Google", "Apple"].map((p) => (
-            <button key={p} type="button" onClick={() => setStatus(`Continuing with ${p}…`)} className="h-11 text-sm font-semibold hover:bg-white/10" style={glass}>{p}</button>
-          ))}
-        </div>
-        <p className="mt-8 text-center text-sm text-white/60">New to {PRODUCT}? <button type="button" className="font-bold" style={{ color: brand.accentColor }}>Create account</button></p>
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <label htmlFor="email" className="block text-sm">
+            Email
+          </label>
+          <input
+            id="email"
+            data-testid="email"
+            type="email"
+            required
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={field}
+            style={glass}
+          />
+          <label htmlFor="password" className="block text-sm">
+            Password
+          </label>
+          <input
+            id="password"
+            data-testid="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={field}
+            style={glass}
+          />
+          {error && (
+            <p role="alert" data-testid="error" className="text-sm font-semibold">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            data-testid="submit"
+            disabled={busy}
+            className="h-12 w-full text-sm font-bold text-white disabled:opacity-50"
+            style={{
+              background: `linear-gradient(90deg, ${brand.primaryColor}, ${brand.accentColor})`,
+              borderRadius: brand.radius,
+            }}
+          >
+            Sign in
+          </button>
+        </form>
+        <p className="mt-4 text-center text-sm">
+          <Link to="/reset-password" className="font-semibold underline">
+            Forgot your password?
+          </Link>
+        </p>
+        <p className="mt-6 text-center text-sm text-white/60">Accounts are created by Finance.</p>
       </main>
     </div>
   );
