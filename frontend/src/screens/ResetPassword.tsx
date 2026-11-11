@@ -74,6 +74,7 @@ function ConfirmForm({ token }: { token: string }) {
   const [password, setPassword] = React.useState("");
   const [confirm, setConfirm] = React.useState("");
   const [error, setError] = React.useState("");
+  const [detail, setDetail] = React.useState("");
   const [done, setDone] = React.useState(false);
   const [expired, setExpired] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -82,6 +83,7 @@ function ConfirmForm({ token }: { token: string }) {
     e.preventDefault();
     setError("");
     setExpired(false);
+    setDetail("");
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
@@ -106,6 +108,7 @@ function ConfirmForm({ token }: { token: string }) {
           ? "This reset link has already been used or has expired. Request a new one."
           : "Could not reset your password. Please try again.",
       );
+      setDetail(used ? err.detail : "");
     } finally {
       setBusy(false);
     }
@@ -158,6 +161,7 @@ function ConfirmForm({ token }: { token: string }) {
       {error && (
         <p role="alert" data-testid="error" className="text-sm font-semibold">
           {error}
+          {detail && <span className="block">{detail}</span>}
         </p>
       )}
       {expired && (
