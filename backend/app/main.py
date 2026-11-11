@@ -34,7 +34,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="ExpenseTrack",
-    description="ExpenseTrack handles employee expense claims for a 5\u201350 person company. Roles: Employee, Manager, Finance. No self sign-up \u2014 Finance creates accounts and assigns each employee a manager. Sign-in: email and password, sign-out, and password reset by email. Claims: an employee creates a claim with one or more lines (date, category, amount in GBP, description), attaches a receipt image or PDF per line (up to 5 MB), and submits it. A draft can be edited; a submitted claim cannot. Approval: a manager approves or rejects their direct reports' submitted claims with a comment. Finance then approves or rejects manager-approved claims and marks approved ones paid. Nobody can approve their own claim. Categories: Finance manages categories (Travel, Meals, Equipment, Other), each with an optional per-line limit. Lines over the limit are flagged for the approver. Dashboard: employees see their claims by status. Finance sees totals by category and month, and can export approved claims as CSV. Out of scope: currency conversion, mileage, card feeds, accounting integrations. Stack: React, FastAPI, PostgreSQL, S3 for receipts, on AWS. English only,\n\nManagers and Finance staff also incur expenses. Who should approve a claim submitted by a Manager, or by a Finance user, given nobody can approve their own claim?\n\nAssigned manager, then Finance",
+    description=(
+        "ExpenseTrack handles employee expense claims for a 5\u201350 person company. "
+        "Roles: Employee, Manager, Finance. No self sign-up \u2014 Finance creates accounts "
+        "and assigns each employee a manager. Claims have lines with receipts; managers "
+        "approve their direct reports' claims, then Finance approves and marks them paid. "
+        "Nobody can approve their own claim. Stack: React, FastAPI, PostgreSQL, S3."
+    ),
     version="0.1.0",
     lifespan=lifespan,
 )
