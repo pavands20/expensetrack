@@ -1,21 +1,18 @@
 """Receipt upload and short-lived download links."""
 
-import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import storage
 from app.database import get_db
 from app.deps import require_auth
-from app.models import ClaimLine, User, utcnow
-from app.routers.claims import _out, _own_draft, _visible_claim
+from app.models import User, utcnow
+from app.routers.claims import _claim_line, _discard, _out, _own_draft, _visible_claim
 from app.schemas import ClaimOut
 
 router = APIRouter(prefix="/api/claims")
-logger = logging.getLogger(__name__)
 
 MAX_BYTES = 5 * 1024 * 1024
 REJECTED = "Receipts must be JPEG, PNG or PDF files of 5 MB or less."
@@ -27,22 +24,6 @@ MAGIC = {
 }
 
 
-def _line(db: Session, claim_id: int, line_id: int) -> ClaimLine:
-    line = db.scalar(
-        select(ClaimLine).where(ClaimLine.id == line_id, ClaimLine.claim_id == claim_id)
-    )
-    if line is None:
-        raise HTTPException(status_code=404, detail="Line not found")
-    return line
-
-
-def _discard(key: str) -> None:
-    try:
-        storage.delete_object(key)
-    except Exception:
-        logger.exception("Failed to delete receipt object %r", key)
-
-
 @router.put("/{claim_id}/lines/{line_id}/receipt", response_model=ClaimOut)
 def put_receipt(
     claim_id: int,
@@ -52,7 +33,7 @@ def put_receipt(
     db: Session = Depends(get_db),
 ) -> ClaimOut:
     claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
-    line = _line(db, claim_id, line_id)
+    line = _claim_line(db, claim_id, line_id)
     data = file.file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail=REJECTED)
@@ -83,7 +64,7 @@ def receipt_url(
     db: Session = Depends(get_db),
 ) -> dict[str, str | int]:
     _visible_claim(db, claim_id, user)
-    line = _line(db, claim_id, line_id)
+    line = _claim_line(db, claim_id, line_id)
     if not line.receipt_key:
         raise HTTPException(status_code=404, detail="Receipt not found")
     url, expires = storage.presign_get(line.receipt_key)

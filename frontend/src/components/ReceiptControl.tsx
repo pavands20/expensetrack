@@ -65,7 +65,7 @@ export function ReceiptControl({
   async function onView() {
     setError("");
     try {
-      const res = await apiFetch<{ url: string }>(`${base.replace(/receipt$/, "receipt-url")}`);
+      const res = await apiFetch<{ url: string }>(`${base}-url`);
       window.open(res.url, "_blank", "noopener,noreferrer");
     } catch {
       setError("Could not open the receipt. Please try again.");
@@ -92,7 +92,7 @@ export function ReceiptControl({
         <input
           type="file"
           aria-label={label}
-          accept="image/jpeg,image/png,application/pdf"
+          accept={TYPES.join(",")}
           disabled={busy}
           onChange={onFile}
         />

@@ -52,6 +52,13 @@ def _out(db: Session, claim: Claim) -> ClaimOut:
     )
 
 
+def _discard(key: str) -> None:
+    try:
+        storage.delete_object(key)
+    except Exception:
+        logger.exception("Failed to delete receipt object %r", key)
+
+
 def _visible_claim(db: Session, claim_id: int, user: User) -> Claim:
     claim = db.scalar(visible_claims(db, user).where(Claim.id == claim_id))
     if claim is None:
@@ -180,10 +187,7 @@ def delete_line(
     claim.updated_at = utcnow()
     db.commit()
     if key:
-        try:
-            storage.delete_object(key)
-        except Exception:
-            logger.exception("Failed to delete receipt object %r", key)
+        _discard(key)
     return _out(db, claim)
 
 
@@ -208,8 +212,5 @@ def delete_claim(
     db.delete(claim)
     db.commit()
     for key in keys:
-        try:
-            storage.delete_object(key)
-        except Exception:
-            logger.exception("Failed to delete receipt object %r", key)
+        _discard(key)
     return Response(status_code=204)
