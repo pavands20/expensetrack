@@ -12,7 +12,7 @@ from app.database import get_db
 from app.deps import require_auth
 from app.models import Category, Claim, ClaimLine, User, utcnow
 from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut
-from app.services.users import direct_reports
+from app.services.claims import visible_claims
 
 router = APIRouter(prefix="/api/claims")
 logger = logging.getLogger(__name__)
@@ -53,15 +53,10 @@ def _out(db: Session, claim: Claim) -> ClaimOut:
 
 
 def _visible_claim(db: Session, claim_id: int, user: User) -> Claim:
-    claim = db.get(Claim, claim_id)
-    if claim is not None:
-        if (
-            claim.owner_id == user.id
-            or user.role == "Finance"
-            or claim.owner_id in {r.id for r in direct_reports(db, user.id)}
-        ):
-            return claim
-    raise HTTPException(status_code=404, detail="Claim not found")
+    claim = db.scalar(visible_claims(db, user).where(Claim.id == claim_id))
+    if claim is None:
+        raise HTTPException(status_code=404, detail="Claim not found")
+    return claim
 
 
 def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
@@ -71,6 +66,13 @@ def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
     if claim.status != "draft":
         raise HTTPException(status_code=409, detail=message)
     return claim
+
+
+@router.get("", response_model=list[ClaimOut])
+def list_claims(
+    user: User = Depends(require_auth), db: Session = Depends(get_db)
+) -> list[ClaimOut]:
+    return [_out(db, c) for c in db.scalars(visible_claims(db, user))]
 
 
 @router.post("", status_code=201, response_model=ClaimOut)
