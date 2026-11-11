@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, clearSessionToken } from "@/lib/api";
 import { brand } from "@/lib/brand";
 
 const glass = {
@@ -75,11 +75,13 @@ function ConfirmForm({ token }: { token: string }) {
   const [confirm, setConfirm] = React.useState("");
   const [error, setError] = React.useState("");
   const [done, setDone] = React.useState(false);
+  const [expired, setExpired] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setExpired(false);
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
@@ -94,11 +96,14 @@ function ConfirmForm({ token }: { token: string }) {
         method: "POST",
         body: JSON.stringify({ token, new_password: password }),
       });
+      clearSessionToken();
       setDone(true);
     } catch (err) {
+      const used = err instanceof ApiError && err.status === 400;
+      setExpired(used);
       setError(
-        err instanceof ApiError && err.status === 400
-          ? "Reset link is invalid or has expired"
+        used
+          ? "This reset link has already been used or has expired. Request a new one."
           : "Could not reset your password. Please try again.",
       );
     } finally {
@@ -154,6 +159,11 @@ function ConfirmForm({ token }: { token: string }) {
         <p role="alert" data-testid="error" className="text-sm font-semibold">
           {error}
         </p>
+      )}
+      {expired && (
+        <Link to="/reset-password" className="block text-sm font-semibold underline">
+          Request a new link
+        </Link>
       )}
       <button
         type="submit"
