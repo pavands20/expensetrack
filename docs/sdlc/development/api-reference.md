@@ -10,12 +10,19 @@
 | GET | /api/auth/me | me | `backend/app/routers/auth.py:60` | — |
 | POST | /api/auth/password-reset/confirm | reset_confirm | `backend/app/routers/auth.py:91` | — |
 | POST | /api/auth/password-reset/request | reset_request | `backend/app/routers/auth.py:65` | — |
+| GET | /api/categories | list_categories | `backend/app/routers/categories.py:41` | — |
+| POST | /api/categories | create_category | `backend/app/routers/categories.py:53` | — |
+| PATCH | /api/categories/{category_id} | patch_category | `backend/app/routers/categories.py:64` | — |
+| POST | /api/claims | create_claim | `backend/app/routers/claims.py:75` | — |
+| DELETE | /api/claims/{claim_id} | delete_claim | `backend/app/routers/claims.py:126` | — |
+| GET | /api/claims/{claim_id} | get_claim | `backend/app/routers/claims.py:119` | — |
+| POST | /api/claims/{claim_id}/lines | add_line | `backend/app/routers/claims.py:85` | — |
 | GET | /api/healthz | healthz | `backend/app/routers/auth.py:36` | — |
-| GET | /api/users | list_users | `backend/app/routers/users.py:17` | — |
-| POST | /api/users | create_user | `backend/app/routers/users.py:22` | — |
-| PATCH | /api/users/{user_id} | patch_user | `backend/app/routers/users.py:44` | — |
-| POST | /api/users/{user_id}/deactivate | deactivate_user | `backend/app/routers/users.py:60` | — |
-| GET | /health | health | `backend/app/main.py:89` | Liveness probe, and the only route here that is not a stub. |
+| GET | /api/users | list_users | `backend/app/routers/users.py:18` | — |
+| POST | /api/users | create_user | `backend/app/routers/users.py:23` | — |
+| PATCH | /api/users/{user_id} | patch_user | `backend/app/routers/users.py:53` | — |
+| POST | /api/users/{user_id}/deactivate | deactivate_user | `backend/app/routers/users.py:69` | — |
+| GET | /health | health | `backend/app/main.py:91` | Liveness probe. |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -24,7 +31,6 @@
 - DELETE /api/claims/{id}
 - DELETE /api/claims/{id}/lines/{line_id}
 - GET /api/approvals/queue
-- GET /api/categories
 - GET /api/claims
 - GET /api/claims/{id}
 - GET /api/claims/{id}/history
@@ -35,8 +41,6 @@
 - PATCH /api/categories/{id}
 - PATCH /api/claims/{id}/lines/{line_id}
 - PATCH /api/users/{id}
-- POST /api/categories
-- POST /api/claims
 - POST /api/claims/{id}/decision
 - POST /api/claims/{id}/lines
 - POST /api/claims/{id}/mark-paid
@@ -46,10 +50,14 @@
 
 **Code only:**
 
+- DELETE /api/claims/{claim_id}
+- GET /api/claims/{claim_id}
+- PATCH /api/categories/{category_id}
 - PATCH /api/users/{user_id}
+- POST /api/claims/{claim_id}/lines
 - POST /api/users/{user_id}/deactivate
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `879786e`
+Generated from commit `2045c76`
 <!-- sdlc:auto:end source -->
