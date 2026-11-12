@@ -1,15 +1,11 @@
 """Login, logout, me, password reset and healthz."""
 
-import os
-from datetime import timedelta
-
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import aware, current_session, require_auth
-from app.email import send_email
 from app.models import PasswordResetToken, User, UserSession, utcnow
 from app.schemas import (
     LoginIn,
@@ -20,17 +16,11 @@ from app.schemas import (
     UserOut,
 )
 from app.security import hash_password, hash_token, new_token, verify_password
+from app.services.users import send_reset_email
 
 router = APIRouter()
 
 RESET_MESSAGE = "If that email belongs to an account, a reset link has been sent."
-
-
-def _reset_minutes() -> int:
-    try:
-        return int(os.getenv("RESET_TOKEN_MINUTES", "60"))
-    except ValueError:
-        return 60
 
 
 @router.get("/api/healthz")
@@ -63,28 +53,12 @@ def me(user: User = Depends(require_auth)) -> User:
 
 
 @router.post("/api/auth/password-reset/request", status_code=202, response_model=MessageOut)
-def reset_request(body: ResetRequestIn, db: Session = Depends(get_db)) -> MessageOut:
+def reset_request(
+    body: ResetRequestIn, background: BackgroundTasks, db: Session = Depends(get_db)
+) -> MessageOut:
     user = db.scalar(select(User).where(User.email == body.email.lower()))
     if user is not None and user.is_active:
-        # Delivery of the link is the email component's job; only the hash is stored.
-        token = new_token()
-        db.add(
-            PasswordResetToken(
-                user_id=user.id,
-                token_hash=hash_token(token),
-                expires_at=utcnow() + timedelta(minutes=_reset_minutes()),
-            )
-        )
-        db.commit()
-        base = os.getenv("FRONTEND_BASE_URL", "").strip()
-        if not base:
-            origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
-            base = origins[0] if origins else "http://localhost:5173"
-        send_email(
-            user.email,
-            "Reset your password",
-            f"Reset your password: {base.rstrip('/')}/reset-password?token={token}",
-        )
+        send_reset_email(db, user, background, "Reset your password")
     return MessageOut(message=RESET_MESSAGE)
 
 

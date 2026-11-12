@@ -26,7 +26,7 @@ def check_manager(db: Session, manager_id: int | None, user_id: int | None = Non
     if manager_id is None:
         return
     mgr = db.get(User, manager_id)
-    if manager_id == user_id or mgr is None or not mgr.is_active:
+    if manager_id == user_id or mgr is None or not mgr.is_active or mgr.role != "Manager":
         raise HTTPException(status_code=422, detail="Invalid manager")
 
 
