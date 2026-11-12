@@ -25,6 +25,12 @@ Passed: 0 · Failed: 0 · Skipped: 0 · Flaky: 0 · Total: 0
 
 | Step | Status | Ticket | Finished |
 |---|---|---|---|
+| run_checks | succeeded | — | 2026-11-12 |
+
+### Sprint 3
+
+| Step | Status | Ticket | Finished |
+|---|---|---|---|
 | run_checks | succeeded | — | 2026-11-11 |
 | write_tests | succeeded | US-011 | 2026-11-11 |
 | write_tests | succeeded | US-013 | 2026-11-11 |
