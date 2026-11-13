@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { apiFetch, ApiError } from "@/lib/api";
+import { useCurrentUser } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { Icons } from "@/lib/icons";
 import { ApprovalPanel } from "@/components/ApprovalPanel";
@@ -20,6 +21,7 @@ type Line = {
   description: string;
   has_receipt?: boolean;
   over_limit?: boolean;
+  category_limit_gbp?: string | null;
 };
 type Rejection = { comment: string; decided_by_name: string; decided_at: string };
 type ClaimData = {
@@ -84,6 +86,7 @@ function serverErrors(err: unknown): Errors | null {
 
 export default function Screen() {
   const navigate = useNavigate();
+  const me = useCurrentUser();
   const params = useParams();
   const routeId = params.id;
   const [claim, setClaim] = React.useState<ClaimData | null>(null);
@@ -147,6 +150,11 @@ export default function Screen() {
     ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1).replace(/_/g, " ")
     : "Draft";
   const lines = claim?.lines ?? [];
+  const isApprover =
+    me !== null &&
+    (me.role === "Manager" || me.role === "Finance") &&
+    claim !== null &&
+    me.id !== claim.owner_id;
 
   function setField(k: keyof Form, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -391,13 +399,15 @@ export default function Screen() {
                     </td>
                     <td style={{ maxWidth: 280 }}>
                       {l.description}
-                      {l.over_limit && (
+                      {l.over_limit && isApprover && (
                         <strong
                           data-testid={`over-limit-${l.id}`}
                           className="xt-cat"
                           style={{ marginLeft: 8, borderStyle: "dashed", borderColor: "var(--a)" }}
                         >
-                          Over limit
+                          {l.category_limit_gbp
+                            ? `Over limit (${gbp(l.category_limit_gbp)})`
+                            : "Over limit"}
                         </strong>
                       )}
                     </td>

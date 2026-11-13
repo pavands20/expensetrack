@@ -11,6 +11,7 @@ type Row = {
   owner_name: string;
   total_gbp: string;
   status: string;
+  lines?: { over_limit?: boolean }[];
 };
 
 const label = (s: string) => s.replace(/_/g, " ");
@@ -52,6 +53,11 @@ function Queue() {
               <TR key={r.id} data-testid={`queue-${r.id}`}>
                 <TD>
                   <Link to={`/claims/${r.id}`}>{r.reference}</Link>
+                  {r.lines?.some((l) => l.over_limit) && (
+                    <strong data-testid={`queue-over-limit-${r.id}`} style={{ marginLeft: 8 }}>
+                      Over limit
+                    </strong>
+                  )}
                 </TD>
                 <TD>{r.owner_name}</TD>
                 <TD>£{r.total_gbp}</TD>

@@ -76,6 +76,9 @@ def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
                         has_receipt=bool(ln.receipt_key),
                         over_limit=cat.limit_gbp is not None
                         and Decimal(ln.amount) > Decimal(cat.limit_gbp),
+                        category_limit_gbp=None
+                        if cat.limit_gbp is None
+                        else f"{Decimal(cat.limit_gbp):.2f}",
                     )
                     for ln, cat in pairs
                 ],
