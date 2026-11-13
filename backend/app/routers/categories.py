@@ -68,6 +68,9 @@ def patch_category(
     c = db.get(Category, category_id)
     if c is None:
         raise HTTPException(status_code=404, detail="Category not found")
+    for field in ("name", "is_active"):
+        if field in body.model_fields_set and getattr(body, field) is None:
+            raise HTTPException(status_code=422, detail=f"{field} cannot be null")
     if body.name is not None:
         _check_unique(db, body.name, category_id)
         c.name = body.name

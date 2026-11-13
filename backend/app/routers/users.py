@@ -10,7 +10,7 @@ from app.deps import require_finance
 from app.models import User
 from app.schemas import UserCreateIn, UserOut, UserPatchIn
 from app.security import hash_password, new_token
-from app.services.users import check_manager, revoke_access, send_reset_email
+from app.services.users import check_manager, direct_reports, revoke_access, send_reset_email
 
 router = APIRouter(prefix="/api/users", dependencies=[Depends(require_finance)])
 
@@ -60,7 +60,15 @@ def patch_user(user_id: int, body: UserPatchIn, db: Session = Depends(get_db)) -
         user.manager_id = body.manager_id
     if body.name is not None:
         user.name = body.name
-    if body.role is not None:
+    if body.role is not None and body.role != user.role:
+        if user.role == "Finance" and not db.scalar(
+            select(User.id).where(
+                User.role == "Finance", User.is_active.is_(True), User.id != user.id
+            )
+        ):
+            raise HTTPException(status_code=409, detail="Cannot demote the only Finance user")
+        if user.role == "Manager" and direct_reports(db, user.id):
+            raise HTTPException(status_code=409, detail="Reassign this manager's reports first")
         user.role = body.role
     db.commit()
     return user

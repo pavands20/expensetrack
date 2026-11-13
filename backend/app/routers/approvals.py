@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.deps import require_auth
 from app.models import Claim, ClaimLine, User, utcnow
-from app.routers.claims import _out, _own_draft
+from app.routers.claims import _out, _outs, _own_draft
 from app.schemas import ClaimOut
 
 router = APIRouter()
@@ -60,4 +60,4 @@ def queue(user: User = Depends(require_auth), db: Session = Depends(get_db)) -> 
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
     q = q.order_by(Claim.created_at.desc(), Claim.id.desc())
-    return [_out(db, c) for c in db.scalars(q)]
+    return _outs(db, list(db.scalars(q)))

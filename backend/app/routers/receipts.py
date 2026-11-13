@@ -41,11 +41,11 @@ def put_receipt(
     if ctype not in TYPES or not data.startswith(MAGIC[ctype]):
         raise HTTPException(status_code=415, detail=REJECTED)
     key = f"receipts/{claim.id}/{line.id}/{uuid.uuid4()}.{TYPES[ctype]}"
-    storage.put_object(key, data, ctype)
     old = line.receipt_key
-    line.receipt_key = key
-    claim.updated_at = utcnow()
     try:
+        storage.put_object(key, data, ctype)
+        line.receipt_key = key
+        claim.updated_at = utcnow()
         db.commit()
     except Exception:
         db.rollback()

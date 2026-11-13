@@ -4,7 +4,7 @@ import logging
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app import storage
@@ -18,38 +18,56 @@ router = APIRouter(prefix="/api/claims")
 logger = logging.getLogger(__name__)
 
 
-def _out(db: Session, claim: Claim) -> ClaimOut:
+def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
+    if not claims:
+        return []
     rows = db.execute(
         select(ClaimLine, Category)
         .join(Category, Category.id == ClaimLine.category_id)
-        .where(ClaimLine.claim_id == claim.id)
+        .where(ClaimLine.claim_id.in_([c.id for c in claims]))
         .order_by(ClaimLine.date, ClaimLine.id)
     ).all()
-    total = sum((Decimal(ln.amount) for ln, _ in rows), Decimal("0"))
-    owner = db.get(User, claim.owner_id)
-    return ClaimOut(
-        id=claim.id,
-        reference=claim.reference,
-        title=claim.title,
-        status=claim.status,
-        owner_id=claim.owner_id,
-        owner_name=owner.name if owner else "",
-        created_at=claim.created_at.isoformat(),
-        lines=[
-            LineOut(
-                id=ln.id,
-                date=ln.date.isoformat(),
-                category_id=cat.id,
-                category_name=cat.name,
-                category_is_active=cat.is_active,
-                amount_gbp=f"{Decimal(ln.amount):.2f}",
-                description=ln.description,
-                has_receipt=bool(ln.receipt_key),
+    by_claim: dict[int, list] = {}
+    for ln, cat in rows:
+        by_claim.setdefault(ln.claim_id, []).append((ln, cat))
+    owners = {
+        u.id: u.name
+        for u in db.scalars(select(User).where(User.id.in_({c.owner_id for c in claims})))
+    }
+    result = []
+    for claim in claims:
+        pairs = by_claim.get(claim.id, [])
+        total = sum((Decimal(ln.amount) for ln, _ in pairs), Decimal("0"))
+        result.append(
+            ClaimOut(
+                id=claim.id,
+                reference=claim.reference,
+                title=claim.title,
+                status=claim.status,
+                owner_id=claim.owner_id,
+                owner_name=owners.get(claim.owner_id, ""),
+                created_at=claim.created_at.isoformat(),
+                lines=[
+                    LineOut(
+                        id=ln.id,
+                        date=ln.date.isoformat(),
+                        category_id=cat.id,
+                        category_name=cat.name,
+                        category_is_active=cat.is_active,
+                        amount_gbp=f"{Decimal(ln.amount):.2f}",
+                        description=ln.description,
+                        has_receipt=bool(ln.receipt_key),
+                    )
+                    for ln, cat in pairs
+                ],
+                total_gbp=f"{total:.2f}",
             )
-            for ln, cat in rows
-        ],
-        total_gbp=f"{total:.2f}",
-    )
+        )
+    return result
+
+
+def _out(db: Session, claim: Claim) -> ClaimOut:
+    return _outs(db, [claim])[0]
 
 
 def _discard(key: str) -> None:
@@ -70,7 +88,13 @@ def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
     claim = _visible_claim(db, claim_id, user)
     if claim.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
-    if claim.status != "draft":
+    # Row lock serialises concurrent edits and submits; status is read after the lock.
+    status = db.scalar(
+        select(Claim.status).where(Claim.id == claim.id).with_for_update().execution_options(
+            populate_existing=True
+        )
+    )
+    if status != "draft":
         raise HTTPException(status_code=409, detail=message)
     return claim
 
@@ -79,7 +103,7 @@ def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
 def list_claims(
     user: User = Depends(require_auth), db: Session = Depends(get_db)
 ) -> list[ClaimOut]:
-    return [_out(db, c) for c in db.scalars(visible_claims(db, user))]
+    return _outs(db, list(db.scalars(visible_claims(db, user))))
 
 
 @router.post("", status_code=201, response_model=ClaimOut)
@@ -179,7 +203,9 @@ def delete_line(
 ) -> ClaimOut:
     claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
     line = _claim_line(db, claim_id, line_id)
-    count = len(list(db.scalars(select(ClaimLine.id).where(ClaimLine.claim_id == claim.id))))
+    count = db.scalar(
+        select(func.count()).select_from(ClaimLine).where(ClaimLine.claim_id == claim.id)
+    )
     if count <= 1:
         raise HTTPException(status_code=409, detail="A claim needs at least one line")
     key = line.receipt_key
