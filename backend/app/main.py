@@ -27,6 +27,7 @@ from app.routers import (
     history,
     payments,
     receipts,
+    reports,
     users,
 )
 from app.security import hash_password
@@ -122,6 +123,7 @@ app.include_router(approvals.router)
 app.include_router(history.router)
 app.include_router(payments.router)
 app.include_router(dashboard.router)
+app.include_router(reports.router)
 
 
 @app.get("/health")
