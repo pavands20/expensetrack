@@ -12,6 +12,7 @@ import Approvals from "@/screens/Approvals";
 import Help from "@/screens/Help";
 import Users from "@/screens/Users";
 import Categories from "@/screens/Categories";
+import Totals from "@/screens/Totals";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -75,6 +76,12 @@ function AppShellLayout() {
                 {"Categories"}
               </NavLink>
             )}
+            {currentUser?.role === "Finance" && (
+              <NavLink to="/admin/totals" className={navLinkClass}>
+                <Icons.FileText size={16} />
+                {"Totals"}
+              </NavLink>
+            )}
           </nav>
           <button
             type="button"
@@ -110,6 +117,7 @@ export default function App() {
           <Route path="/help" element={<Help />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/categories" element={<Categories />} />
+          <Route path="/admin/totals" element={<Totals />} />
         </Route>
       </Route>
       <Route path="/sign-in" element={<SignIn />} />

@@ -31,6 +31,40 @@ def _safe(value: str) -> str:
     return "'" + value if value[:1] in ("=", "+", "-", "@") else value
 
 
+@router.get("/api/reports/totals")
+def totals(db: Session = Depends(get_db)) -> list[dict]:
+    """GBP totals of approved/paid claim lines per UTC approval month and category."""
+    approved_at = (
+        select(
+            ClaimStatusChange.claim_id.label("cid"),
+            func.max(ClaimStatusChange.created_at).label("at"),
+        )
+        .where(ClaimStatusChange.new_status == "approved")
+        .group_by(ClaimStatusChange.claim_id)
+        .subquery()
+    )
+    if db.get_bind().dialect.name == "sqlite":
+        month = func.strftime("%Y-%m", approved_at.c.at)
+    else:
+        month = func.to_char(func.timezone("UTC", approved_at.c.at), "YYYY-MM")
+    month = month.label("month")
+    total = func.sum(ClaimLine.amount).label("total")
+    rows = db.execute(
+        select(month, Category.id, Category.name, total)
+        .select_from(Claim)
+        .join(approved_at, approved_at.c.cid == Claim.id)
+        .join(ClaimLine, ClaimLine.claim_id == Claim.id)
+        .join(Category, Category.id == ClaimLine.category_id)
+        .where(Claim.status.in_(("approved", "paid")))
+        .group_by(month, Category.id, Category.name)
+        .order_by(month.desc(), Category.name, Category.id)
+    ).all()
+    return [
+        {"month": m, "category_id": cid, "category": name, "total_gbp": f"{Decimal(t):.2f}"}
+        for m, cid, name, t in rows
+    ]
+
+
 @router.get("/api/reports/export.csv")
 def export_csv(start: dt.date, end: dt.date, db: Session = Depends(get_db)) -> Response:
     if end < start:
