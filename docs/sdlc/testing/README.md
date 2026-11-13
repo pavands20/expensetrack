@@ -3,41 +3,82 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### TEST-RUN-CHECKS · draft · source: testing:run_checks
+### TEST-CHECKS-1 · draft · source: testing:run_checks
 
-An automated check run completed successfully, with 8 of 8 checks passing. It was not tied to a specific ticket.
+Automated project checks ran successfully and all 8 passed. The run was not tied to a specific ticket.
 
-- Step: run_checks
-- Ticket: none
+- Activity: run_checks
+- Ticket: none (project-wide)
 - Status: succeeded
 - Result: 8/8 checks passed
-- Not stated in the input: the names or scope of the 8 checks, the run date, and which requirements (US-xxx) the checks cover. No requirement links are recorded for this reason.
+- Not stated in input:
+  - which checks were run
+  - what the checks cover
+  - the run date
 
-### TEST-WRITE-a30731c5 · draft · source: testing:write_tests:a30731c5-23aa-4b90-ac02-bda91c466a47
+### TEST-WRITE-de8666db · draft · source: testing:write_tests:de8666db-465e-4776-bb60-c95538010835
 
-Tests were written for ticket a30731c5-23aa-4b90-ac02-bda91c466a47, producing 5 test files. This step only reports test authoring; the input gives no result for running these tests on their own.
+Tests were written for ticket de8666db and the task succeeded. It produced 4 test files.
 
-- Step: write_tests
-- Ticket: a30731c5-23aa-4b90-ac02-bda91c466a47
+- Activity: write_tests
+- Ticket: de8666db-465e-4776-bb60-c95538010835
 - Status: succeeded
-- Output: 5 test files
-- Not stated in the input: the file names, which features or requirements the tests cover, the date, and whether these tests are among the 8 checks in run_checks.
+- Output: 4 test file(s)
+- Not stated in input:
+  - file names
+  - which requirement(s) the ticket implements
+  - whether these tests were executed or passed
 
-**Related:** a30731c5-23aa-4b90-ac02-bda91c466a47
+**Related:** de8666db-465e-4776-bb60-c95538010835
 
-### TEST-E2E-SANDBOX · draft · source: testing:e2e:latest
+### TEST-WRITE-a36583ee · draft · source: testing:write_tests:a36583ee-d83f-476d-9fc9-18ceff715aae
 
-The latest end-to-end run against the sandbox target executed no tests (0/0). This is not a pass, so no end-to-end behaviour is verified yet.
+Tests were written for ticket a36583ee and the task succeeded. It produced 1 test file.
 
-- Run: latest E2E run
+- Activity: write_tests
+- Ticket: a36583ee-d83f-476d-9fc9-18ceff715aae
+- Status: succeeded
+- Output: 1 test file(s)
+- Not stated in input:
+  - file name
+  - which requirement(s) the ticket implements
+  - whether the test was executed or passed
+
+**Related:** a36583ee-d83f-476d-9fc9-18ceff715aae
+
+### TEST-WRITE-18c738fa · draft · source: testing:write_tests:18c738fa-1dbd-4e10-bca9-da232c10d656
+
+Tests were written for ticket 18c738fa and the task succeeded. It produced 2 test files.
+
+- Activity: write_tests
+- Ticket: 18c738fa-1dbd-4e10-bca9-da232c10d656
+- Status: succeeded
+- Output: 2 test file(s)
+- Not stated in input:
+  - file names
+  - which requirement(s) the ticket implements
+  - whether these tests were executed or passed
+
+**Related:** 18c738fa-1dbd-4e10-bca9-da232c10d656
+
+### TEST-E2E-LATEST · draft · source: testing:e2e:sandbox
+
+The latest end-to-end run against the sandbox reported 'no_tests', with 0 of 0 passed. No end-to-end behaviour has been verified yet.
+
+- Activity: end-to-end run
 - Target: sandbox
-- Result: no_tests, 0/0 passed
-- Meaning: no end-to-end scenarios ran. None of these user flows have E2E verification:
-  - sign-in, sign-out and password reset
-  - creating and submitting claims
-  - manager and Finance approval
-  - marking claims paid
-  - category limits
-  - dashboards and CSV export
-- Gap to close: add E2E scenarios and re-run against sandbox before treating the release as end-to-end tested.
+- Status: no_tests
+- Result: 0/0 passed
+- Interpretation: no E2E tests existed or were picked up for this run. This is not a pass and gives no evidence about user-facing flows.
+- Flows still without E2E evidence:
+  - sign-in and sign-out
+  - password reset by email
+  - claim creation, draft editing and submission
+  - receipt upload
+  - manager approval and Finance approval
+  - the approval chain for claims from Managers and Finance users (assigned manager, then Finance), with no self-approval
+  - per-line category limit flags
+  - dashboards
+  - CSV export of approved claims
+- Open item: E2E tests need to be written or wired into the run before end-to-end coverage can be reported.
 <!-- sdlc:auto:end narrative -->
