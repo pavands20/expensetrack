@@ -3,6 +3,17 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 976fbed0326e — 2026-11-13
+
+**Commit:** `976fbed`
+
+**Delivered:**
+- US-012: View receipts through short-lived private links
+- US-014: Manager approves or rejects direct reports' claims
+- US-015: Finance approves or rejects manager-approved claims
+- US-017: Nobody approves their own claim
+- US-025: Audit trail of claim status changes
+
 ## 0afa666a9ac7 — 2026-11-13
 
 **Commit:** `0afa666`
