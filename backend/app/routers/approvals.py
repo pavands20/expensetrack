@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, aliased
 
 from app.database import get_db
 from app.deps import require_auth
-from app.models import Claim, ClaimLine, User, record_status_change, utcnow
+from app.models import Claim, ClaimLine, ClaimStatusChange, User, record_status_change, utcnow
 from app.routers.claims import _out, _outs, _own_draft, _visible_claim, locked_status
 from app.schemas import ClaimOut, DecisionIn
 from app.services.decisions import assert_not_submitter
@@ -73,6 +73,17 @@ def decide_claim(
     stage = "pending_manager" if user.role == "Manager" else "pending_finance"
     if user.role == "Finance" and status == "pending_manager" and not _has_manager(db, owner):
         stage = "pending_manager"  # orphaned manager stage: Finance decides it
+    if user.role == "Finance" and stage == "pending_finance":
+        already = db.scalar(
+            select(ClaimStatusChange.id).where(
+                ClaimStatusChange.claim_id == claim.id,
+                ClaimStatusChange.old_status == "pending_manager",
+                ClaimStatusChange.new_status == "pending_finance",
+                ClaimStatusChange.actor_id == user.id,
+            )
+        )
+        if already is not None:
+            raise HTTPException(status_code=403, detail="Forbidden")
     if status != stage:
         raise HTTPException(status_code=409, detail="Claim is not awaiting your decision")
     comment = (body.comment or "").strip() or None

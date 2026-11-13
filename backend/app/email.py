@@ -15,6 +15,7 @@ def send_email(to: str, subject: str, body: str) -> None:
     host = os.getenv("SMTP_HOST", "").strip()
     if not host:
         outbox.append({"to": to, "subject": subject, "body": body})
+        del outbox[:-1000]  # bounded: keep only the latest messages
         logger.info("SMTP_HOST unset; would send an email with subject %r", subject)
         return
     try:

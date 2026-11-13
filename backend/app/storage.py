@@ -5,26 +5,38 @@ import hmac
 import os
 import secrets
 import time
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote
 
 EXPIRES_IN = 300
-_SECRET = secrets.token_bytes(32)  # per process: local links die on restart
+_FALLBACK_SECRET = secrets.token_bytes(32)  # only when no secret is configured (laptop)
 
 
 def _bucket() -> str:
     return os.getenv("S3_BUCKET", "").strip()
 
 
-def _s3():
-    import boto3
+@lru_cache(maxsize=4)
+def _client(factory, region: str | None):
     from botocore.config import Config
 
-    return boto3.client(
+    return factory(
         "s3",
-        region_name=os.getenv("AWS_REGION") or None,
+        region_name=region,
         config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}),
     )
+
+
+def _s3():
+    import boto3
+
+    return _client(boto3.client, os.getenv("AWS_REGION") or None)
+
+
+def _secret() -> bytes:
+    configured = os.getenv("JWT_SECRET_KEY", "")
+    return configured.encode() if configured else _FALLBACK_SECRET
 
 
 def _safe_key(key: str) -> str:
@@ -51,9 +63,7 @@ def _media_path(key: str) -> Path:
 def put_object(key: str, data: bytes, content_type: str) -> None:
     key = _safe_key(key)
     if _bucket():
-        _s3().put_object(
-            Bucket=_bucket(), Key=key, Body=data, ContentType=content_type, **_owner()
-        )
+        _s3().put_object(Bucket=_bucket(), Key=key, Body=data, ContentType=content_type, **_owner())
         return
     path = _media_path(key)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -61,7 +71,7 @@ def put_object(key: str, data: bytes, content_type: str) -> None:
 
 
 def _sign(key: str, exp: int) -> str:
-    return hmac.new(_SECRET, f"{key}:{exp}".encode(), hashlib.sha256).hexdigest()
+    return hmac.new(_secret(), f"{key}:{exp}".encode(), hashlib.sha256).hexdigest()
 
 
 def presign_get(key: str) -> tuple[str, int]:

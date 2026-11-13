@@ -108,13 +108,8 @@ def _visible_claim(db: Session, claim_id: int, user: User) -> Claim:
 
 
 def locked_status(db: Session, claim_id: int) -> str | None:
-    """Re-read a claim's status under a row lock, bypassing the identity map."""
-    return db.scalar(
-        select(Claim.status)
-        .where(Claim.id == claim_id)
-        .with_for_update()
-        .execution_options(populate_existing=True)
-    )
+    """Read a claim's current status from the database under a row lock."""
+    return db.scalar(select(Claim.status).where(Claim.id == claim_id).with_for_update())
 
 
 def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
