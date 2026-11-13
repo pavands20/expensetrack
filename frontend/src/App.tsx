@@ -8,6 +8,7 @@ import ResetPassword from "@/screens/ResetPassword";
 import SignIn from "@/screens/SignIn";
 import Dashboard from "@/screens/Dashboard";
 import Claim from "@/screens/Claim";
+import Approvals from "@/screens/Approvals";
 import Help from "@/screens/Help";
 import Users from "@/screens/Users";
 import Categories from "@/screens/Categories";
@@ -56,6 +57,12 @@ function AppShellLayout() {
               <Icons.Menu size={16} />
               {"User guide"}
             </NavLink>
+            {(currentUser?.role === "Manager" || currentUser?.role === "Finance") && (
+              <NavLink to="/approvals" className={navLinkClass}>
+                <Icons.CheckCircle size={16} />
+                {"Approvals"}
+              </NavLink>
+            )}
             {currentUser?.role === "Finance" && (
               <NavLink to="/admin/users" className={navLinkClass}>
                 <Icons.Users size={16} />
@@ -99,6 +106,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/claim" element={<Claim />} />
           <Route path="/claims/:id" element={<Claim />} />
+          <Route path="/approvals" element={<Approvals />} />
           <Route path="/help" element={<Help />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/categories" element={<Categories />} />

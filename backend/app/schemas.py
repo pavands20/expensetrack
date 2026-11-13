@@ -107,6 +107,18 @@ class LineOut(BaseModel):
     amount_gbp: str
     description: str
     has_receipt: bool = False
+    over_limit: bool = False
+
+
+class RejectionOut(BaseModel):
+    comment: str
+    decided_by_name: str
+    decided_at: str
+
+
+class DecisionIn(BaseModel):
+    decision: Literal["approve", "reject"]
+    comment: Annotated[str, StringConstraints(max_length=500)] | None = None
 
 
 class ClaimOut(BaseModel):
@@ -119,6 +131,7 @@ class ClaimOut(BaseModel):
     created_at: str
     lines: list[LineOut]
     total_gbp: str
+    last_rejection: RejectionOut | None = None
 
 
 class CategoryOut(BaseModel):

@@ -18,11 +18,29 @@ def _bucket() -> str:
 
 def _s3():
     import boto3
+    from botocore.config import Config
 
-    return boto3.client("s3", region_name=os.getenv("AWS_REGION") or None)
+    return boto3.client(
+        "s3",
+        region_name=os.getenv("AWS_REGION") or None,
+        config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}),
+    )
+
+
+def _safe_key(key: str) -> str:
+    parts = key.split("/")
+    if not key or key.startswith("/") or "\\" in key or "\x00" in key or ".." in parts:
+        raise ValueError("Invalid storage key")
+    return key
+
+
+def _owner() -> dict:
+    owner = os.getenv("S3_BUCKET_OWNER", "").strip()
+    return {"ExpectedBucketOwner": owner} if owner else {}
 
 
 def _media_path(key: str) -> Path:
+    key = _safe_key(key)
     root = Path(os.getenv("MEDIA_ROOT", "./media")).resolve()
     path = (root / key).resolve()
     if root not in path.parents:
@@ -31,8 +49,11 @@ def _media_path(key: str) -> Path:
 
 
 def put_object(key: str, data: bytes, content_type: str) -> None:
+    key = _safe_key(key)
     if _bucket():
-        _s3().put_object(Bucket=_bucket(), Key=key, Body=data, ContentType=content_type)
+        _s3().put_object(
+            Bucket=_bucket(), Key=key, Body=data, ContentType=content_type, **_owner()
+        )
         return
     path = _media_path(key)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,7 +68,9 @@ def presign_get(key: str) -> tuple[str, int]:
     """A short-lived link: presigned S3 GET, or a signed API URL for MEDIA_ROOT."""
     if _bucket():
         url = _s3().generate_presigned_url(
-            "get_object", Params={"Bucket": _bucket(), "Key": key}, ExpiresIn=EXPIRES_IN
+            "get_object",
+            Params={"Bucket": _bucket(), "Key": _safe_key(key), **_owner()},
+            ExpiresIn=EXPIRES_IN,
         )
         return url, EXPIRES_IN
     exp = int(time.time()) + EXPIRES_IN
@@ -65,6 +88,6 @@ def read_local(key: str) -> bytes | None:
 
 def delete_object(key: str) -> None:
     if _bucket():
-        _s3().delete_object(Bucket=_bucket(), Key=key)
+        _s3().delete_object(Bucket=_bucket(), Key=_safe_key(key), **_owner())
         return
     _media_path(key).unlink(missing_ok=True)
