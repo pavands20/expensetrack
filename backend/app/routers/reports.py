@@ -31,10 +31,8 @@ def _safe(value: str) -> str:
     return "'" + value if value[:1] in ("=", "+", "-", "@") else value
 
 
-@router.get("/api/reports/totals")
-def totals(db: Session = Depends(get_db)) -> list[dict]:
-    """GBP totals of approved/paid claim lines per UTC approval month and category."""
-    approved_at = (
+def _approved_at():
+    return (
         select(
             ClaimStatusChange.claim_id.label("cid"),
             func.max(ClaimStatusChange.created_at).label("at"),
@@ -43,6 +41,12 @@ def totals(db: Session = Depends(get_db)) -> list[dict]:
         .group_by(ClaimStatusChange.claim_id)
         .subquery()
     )
+
+
+@router.get("/api/reports/totals")
+def totals(db: Session = Depends(get_db)) -> list[dict]:
+    """GBP totals of approved/paid claim lines per UTC approval month and category."""
+    approved_at = _approved_at()
     if db.get_bind().dialect.name == "sqlite":
         month = func.strftime("%Y-%m", approved_at.c.at)
     else:
@@ -71,15 +75,7 @@ def export_csv(start: dt.date, end: dt.date, db: Session = Depends(get_db)) -> R
         raise HTTPException(status_code=422, detail="End date must not be before the start date")
     lo = datetime.combine(start, dt.time.min, tzinfo=UTC)
     hi = datetime.combine(end, dt.time.min, tzinfo=UTC) + timedelta(days=1)
-    approved_at = (
-        select(
-            ClaimStatusChange.claim_id.label("cid"),
-            func.max(ClaimStatusChange.created_at).label("at"),
-        )
-        .where(ClaimStatusChange.new_status == "approved")
-        .group_by(ClaimStatusChange.claim_id)
-        .subquery()
-    )
+    approved_at = _approved_at()
     rows = db.execute(
         select(Claim, ClaimLine, Category, User)
         .join(approved_at, approved_at.c.cid == Claim.id)

@@ -65,22 +65,20 @@ function AppShellLayout() {
               </NavLink>
             )}
             {currentUser?.role === "Finance" && (
-              <NavLink to="/admin/users" className={navLinkClass}>
-                <Icons.Users size={16} />
-                {"Users"}
-              </NavLink>
-            )}
-            {currentUser?.role === "Finance" && (
-              <NavLink to="/admin/categories" className={navLinkClass}>
-                <Icons.Settings size={16} />
-                {"Categories"}
-              </NavLink>
-            )}
-            {currentUser?.role === "Finance" && (
-              <NavLink to="/admin/totals" className={navLinkClass}>
-                <Icons.FileText size={16} />
-                {"Totals"}
-              </NavLink>
+              <>
+                <NavLink to="/admin/users" className={navLinkClass}>
+                  <Icons.Users size={16} />
+                  {"Users"}
+                </NavLink>
+                <NavLink to="/admin/categories" className={navLinkClass}>
+                  <Icons.Settings size={16} />
+                  {"Categories"}
+                </NavLink>
+                <NavLink to="/admin/totals" className={navLinkClass}>
+                  <Icons.FileText size={16} />
+                  {"Totals"}
+                </NavLink>
+              </>
             )}
           </nav>
           <button

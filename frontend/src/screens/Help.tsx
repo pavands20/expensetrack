@@ -1,5 +1,4 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
 import * as UI from "@/lib/ui";
@@ -7,9 +6,7 @@ import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
 
-const { Button, Card } = UI;
-
-const { User } = Icons;
+const { Button } = UI;
 
 const GUIDE_SECTIONS = [
   {
@@ -106,7 +103,6 @@ const GUIDE_SECTIONS = [
 
 export default function Screen() {
   const navigate = useNavigate();
-  const { Button } = UI;
   const [activeId, setActiveId] = React.useState(GUIDE_SECTIONS[0].id);
   const active = GUIDE_SECTIONS.find((s) => s.id === activeId) || GUIDE_SECTIONS[0];
 
