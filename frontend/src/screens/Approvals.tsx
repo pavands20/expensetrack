@@ -32,9 +32,7 @@ function Queue() {
     <div className="mx-auto grid max-w-5xl gap-6 p-6">
       <h1 className="text-2xl font-bold">Approvals</h1>
       {q.isLoading && <p role="status">Loading…</p>}
-      {q.isError && !(q.error instanceof ApiError && q.error.status === 403) && (
-        <p role="alert">Could not load the approvals queue.</p>
-      )}
+      {q.isError && <p role="alert">Could not load the approvals queue.</p>}
       {q.data && q.data.length === 0 && (
         <Empty title="Nothing waiting for you" description="No claims await your decision." />
       )}

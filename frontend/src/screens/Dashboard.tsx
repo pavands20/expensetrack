@@ -134,9 +134,6 @@ function DashboardView() {
       </p>
     );
 
-  const inReview = 0;
-  void inReview;
-
   return (
     <div
       className="et-root min-h-full p-4 md:p-8"

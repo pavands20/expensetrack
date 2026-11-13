@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import require_finance
-from app.models import Claim, ClaimLine, ClaimStatusChange, User
+from app.models import Category, Claim, ClaimLine, ClaimStatusChange, User
 
 router = APIRouter(dependencies=[Depends(require_finance)])
 
@@ -46,8 +46,6 @@ def export_csv(start: dt.date, end: dt.date, db: Session = Depends(get_db)) -> R
         .group_by(ClaimStatusChange.claim_id)
         .subquery()
     )
-    from app.models import Category
-
     rows = db.execute(
         select(Claim, ClaimLine, Category, User)
         .join(approved_at, approved_at.c.cid == Claim.id)
