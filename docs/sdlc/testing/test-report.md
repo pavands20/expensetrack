@@ -21,6 +21,15 @@ Passed: 0 · Failed: 0 · Skipped: 0 · Flaky: 0 · Total: 0
 <!-- sdlc:auto:end unit -->
 
 <!-- sdlc:auto:start dev-checks -->
+### Sprint 6
+
+| Step | Status | Ticket | Finished |
+|---|---|---|---|
+| run_checks | succeeded | — | 2026-11-13 |
+| write_tests | succeeded | US-022 | 2026-11-13 |
+| write_tests | succeeded | US-026 | 2026-11-13 |
+| write_tests | succeeded | US-027 | 2026-11-13 |
+
 ### Sprint 5
 
 | Step | Status | Ticket | Finished |

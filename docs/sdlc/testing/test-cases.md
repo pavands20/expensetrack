@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-303 tests · Passed 302 · Failed 1 · Skipped 0 · Not run 0
+332 tests · Passed 332 · Failed 0 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 86/102 · passing: 85/102
+Acceptance criteria covered: 94/102 · passing: 94/102
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -29,7 +29,7 @@ Acceptance criteria covered: 86/102 · passing: 85/102
 | AC-019 | App > [AC-019] redirects to sign-in with no token | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-019 | App > [AC-019] renders the shell when signed in | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-020 | App > [AC-020] reset confirm shows the invalid-link message on 400 | Unit | Passed | `frontend/src/App.test.tsx` |
-| AC-021 | App > [AC-021] sign out clears the token even if logout fails | Unit | Failed | `frontend/src/App.test.tsx` |
+| AC-021 | App > [AC-021] sign out clears the token even if logout fails | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-022 | App > [AC-022] shows the notice when me returns 401 | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-017 | test_ac017_login_returns_token_usable_as_bearer | Integration | Passed | `backend/tests/test_auth.py` |
 | AC-018 | test_ac018_identical_401 | Integration | Passed | `backend/tests/test_auth.py` |
@@ -402,6 +402,52 @@ Acceptance criteria covered: 86/102 · passing: 85/102
 | AC-094, NFR-010 | test_ac094_nfr010_mark_paid_succeeds_when_email_fails | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
 | AC-094, NFR-010 | test_ac094_nfr010_submit_succeeds_when_email_fails | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
 | NFR-008 | test_nfr008_notification_emails_only_to_relevant_users | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+
+## Sprint 6
+
+### US-022: Finance totals by category and month
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-084 | test_ac084_sums_per_month_and_category_approved_and_paid | Unit | Passed | `backend/tests/test_totals.py` |
+| AC-085 | test_ac085_unapproved_and_rejected_contribute_nothing | Unit | Passed | `backend/tests/test_totals.py` |
+| AC-086 | test_ac086_roles_and_401 | Unit | Passed | `backend/tests/test_totals.py` |
+| AC-084 | Totals > [AC-084] renders rows with £ formatting and the approved/paid note | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-084 | Totals > [AC-084] shows an error state | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-084 | Totals > [AC-084] shows the empty state | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-086 | Totals > [AC-086] Employee sees access denied and no fetch | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-086 | Totals > [AC-086] Manager sees access denied and no fetch | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-086 | Totals > [AC-086] a 403 from the API shows access denied | Unit | Passed | `frontend/src/screens/Totals.test.tsx` |
+| AC-084 | test_ac084_per_category_per_month_sums_as_two_decimal_strings | Integration | Passed | `backend/tests/integration/test_totals_acceptance_qa.py` |
+| AC-085 | test_ac085_non_approved_states_do_not_change_totals | Integration | Passed | `backend/tests/integration/test_totals_acceptance_qa.py` |
+| AC-086, NFR-004, NFR-008 | test_ac086_nfr004_nfr008_roles_and_no_personal_data | Integration | Passed | `backend/tests/integration/test_totals_acceptance_qa.py` |
+| AC-084 | [AC-084] Finance opens Totals from the nav and sees per-category per-month GBP totals | E2E | Passed | `frontend/e2e/totals.spec.ts` |
+| AC-086, NFR-004 | [AC-086][NFR-004] Employee has no Totals link and sees access denied on /admin/totals | E2E | Passed | `frontend/e2e/totals.spec.ts` |
+
+### US-026: Setup and configuration guide
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-098 | test_ac098_guide_covers_postgres_private_s3_ses_and_settings | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+| AC-098 | test_ac098_guide_gives_run_steps | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+| AC-099 | test_ac099_guide_explains_first_finance_user_and_initial_categories | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+| AC-100 | test_ac100_guide_states_out_of_scope_items | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+| NFR-008, NFR-014 | test_nfr008_nfr014_guide_names_london_region | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+| NFR-014 | test_nfr014_user_guide_covers_roles_and_routing | Unit | Passed | `backend/tests/test_setup_guide_qa.py` |
+
+### US-027: User guide for each role
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-101 | Help guide > [AC-101] Start a new claim navigates to the claim screen | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-101 | Help guide > [AC-101] lists every guide section and shows claim creation first | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-101 | Help guide > [AC-101] receipts section covers uploading receipts | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-101 | Help guide > [AC-101] roles section covers Employee, Manager and Finance tasks | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-101 | Help guide > [AC-101] states unsupported features | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-102 | Help guide > [AC-102] approval routing explains self approval, no manager and Finance own claim | Unit | Passed | `frontend/src/screens/Help.test.tsx` |
+| AC-101, NFR-014 | [AC-101][NFR-014] guide covers claims, receipts, approvals and Finance tasks for each role | E2E | Passed | `frontend/e2e/user-guide.spec.ts` |
+| AC-102 | [AC-102] guide explains routing: no self approval, no assigned manager, Finance own claim | E2E | Passed | `frontend/e2e/user-guide.spec.ts` |
+| NFR-008 | [NFR-008] personal data is reachable only with a token and limited by role | E2E | Passed | `frontend/e2e/user-guide.spec.ts` |
 
 ## Project setup
 

@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start endpoints -->
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
-| GET | /api/approvals/queue | queue | `backend/app/routers/approvals.py:87` | — |
+| GET | /api/approvals/queue | queue | `backend/app/routers/approvals.py:95` | — |
 | POST | /api/auth/login | login | `backend/app/routers/auth.py:31` | — |
 | POST | /api/auth/logout | logout | `backend/app/routers/auth.py:43` | — |
 | GET | /api/auth/me | me | `backend/app/routers/auth.py:50` | — |
@@ -14,25 +14,28 @@
 | GET | /api/categories | list_categories | `backend/app/routers/categories.py:41` | — |
 | POST | /api/categories | create_category | `backend/app/routers/categories.py:53` | — |
 | PATCH | /api/categories/{category_id} | patch_category | `backend/app/routers/categories.py:64` | — |
-| GET | /api/claims | list_claims | `backend/app/routers/claims.py:123` | — |
-| POST | /api/claims | create_claim | `backend/app/routers/claims.py:130` | — |
+| GET | /api/claims | list_claims | `backend/app/routers/claims.py:130` | — |
+| POST | /api/claims | create_claim | `backend/app/routers/claims.py:137` | — |
 | GET | /api/claims/receipt-files/{key:path} | receipt_file | `backend/app/routers/receipts.py:74` | — |
-| DELETE | /api/claims/{claim_id} | delete_claim | `backend/app/routers/claims.py:241` | — |
-| GET | /api/claims/{claim_id} | get_claim | `backend/app/routers/claims.py:234` | — |
-| POST | /api/claims/{claim_id}/decision | decide_claim | `backend/app/routers/approvals.py:49` | — |
+| DELETE | /api/claims/{claim_id} | delete_claim | `backend/app/routers/claims.py:248` | — |
+| GET | /api/claims/{claim_id} | get_claim | `backend/app/routers/claims.py:241` | — |
+| POST | /api/claims/{claim_id}/decision | decide_claim | `backend/app/routers/approvals.py:58` | — |
 | GET | /api/claims/{claim_id}/history | claim_history | `backend/app/routers/history.py:27` | — |
-| POST | /api/claims/{claim_id}/lines | add_line | `backend/app/routers/claims.py:140` | — |
-| DELETE | /api/claims/{claim_id}/lines/{line_id} | delete_line | `backend/app/routers/claims.py:211` | — |
-| PATCH | /api/claims/{claim_id}/lines/{line_id} | patch_line | `backend/app/routers/claims.py:188` | — |
+| POST | /api/claims/{claim_id}/lines | add_line | `backend/app/routers/claims.py:147` | — |
+| DELETE | /api/claims/{claim_id}/lines/{line_id} | delete_line | `backend/app/routers/claims.py:218` | — |
+| PATCH | /api/claims/{claim_id}/lines/{line_id} | patch_line | `backend/app/routers/claims.py:195` | — |
 | PUT | /api/claims/{claim_id}/lines/{line_id}/receipt | put_receipt | `backend/app/routers/receipts.py:27` | — |
 | GET | /api/claims/{claim_id}/lines/{line_id}/receipt-url | receipt_url | `backend/app/routers/receipts.py:59` | — |
-| POST | /api/claims/{claim_id}/submit | submit_claim | `backend/app/routers/approvals.py:17` | — |
+| POST | /api/claims/{claim_id}/mark-paid | mark_paid | `backend/app/routers/payments.py:17` | — |
+| POST | /api/claims/{claim_id}/submit | submit_claim | `backend/app/routers/approvals.py:18` | — |
+| GET | /api/dashboard/me | my_dashboard | `backend/app/routers/dashboard.py:47` | — |
 | GET | /api/healthz | healthz | `backend/app/routers/auth.py:26` | — |
+| GET | /api/reports/export.csv | export_csv | `backend/app/routers/reports.py:34` | — |
 | GET | /api/users | list_users | `backend/app/routers/users.py:18` | — |
 | POST | /api/users | create_user | `backend/app/routers/users.py:23` | — |
 | PATCH | /api/users/{user_id} | patch_user | `backend/app/routers/users.py:53` | — |
-| POST | /api/users/{user_id}/deactivate | deactivate_user | `backend/app/routers/users.py:77` | — |
-| GET | /health | health | `backend/app/main.py:94` | Liveness probe. |
+| POST | /api/users/{user_id}/deactivate | deactivate_user | `backend/app/routers/users.py:80` | — |
+| GET | /health | health | `backend/app/main.py:118` | Liveness probe. |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -43,8 +46,6 @@
 - GET /api/claims/{id}
 - GET /api/claims/{id}/history
 - GET /api/claims/{id}/lines/{line_id}/receipt-url
-- GET /api/dashboard/me
-- GET /api/reports/export.csv
 - GET /api/reports/totals
 - PATCH /api/categories/{id}
 - PATCH /api/claims/{id}/lines/{line_id}
@@ -69,11 +70,12 @@
 - PATCH /api/users/{user_id}
 - POST /api/claims/{claim_id}/decision
 - POST /api/claims/{claim_id}/lines
+- POST /api/claims/{claim_id}/mark-paid
 - POST /api/claims/{claim_id}/submit
 - POST /api/users/{user_id}/deactivate
 - PUT /api/claims/{claim_id}/lines/{line_id}/receipt
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `cc0162c`
+Generated from commit `1c8b347`
 <!-- sdlc:auto:end source -->
