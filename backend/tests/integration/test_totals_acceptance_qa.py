@@ -61,8 +61,12 @@ class W:
         for a in amounts:
             r = self.c.post(
                 f"/api/claims/{cid}/lines",
-                json={"date": "2026-01-05", "category_id": cat, "amount_gbp": a,
-                      "description": "t"},
+                json={
+                    "date": "2026-01-05",
+                    "category_id": cat,
+                    "amount_gbp": a,
+                    "description": "t",
+                },
                 headers=h,
             )
             assert r.status_code == 201, r.text
