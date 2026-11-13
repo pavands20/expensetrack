@@ -18,7 +18,17 @@ from alembic import command
 from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
-from app.routers import approvals, auth, categories, claims, history, payments, receipts, users
+from app.routers import (
+    approvals,
+    auth,
+    categories,
+    claims,
+    dashboard,
+    history,
+    payments,
+    receipts,
+    users,
+)
 from app.security import hash_password
 from app.services.categories import seed_categories
 
@@ -45,6 +55,26 @@ def _seed_admin() -> None:
             db.commit()
 
 
+def _seed_smoke() -> None:
+    """Create one Employee from the smoke-test settings, once."""
+    email = os.getenv("SMOKE_TEST_EMAIL", "").strip().lower()
+    secret = os.getenv("SMOKE_TEST_PASSWORD", "")
+    if not email or not secret:
+        return
+    with SessionLocal() as db:
+        if db.scalar(select(User).where(User.email == email)) is None:
+            db.add(
+                User(
+                    name="Smoke Test",
+                    email=email,
+                    password_hash=hash_password(secret),
+                    role="Employee",
+                    is_active=True,
+                )
+            )
+            db.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Migrate to head, then seed. Runs on startup, never at import."""
@@ -52,6 +82,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
     command.upgrade(cfg, "head")
     _seed_admin()
+    _seed_smoke()
     seed_categories()
     yield
 
@@ -90,6 +121,7 @@ app.include_router(receipts.router)
 app.include_router(approvals.router)
 app.include_router(history.router)
 app.include_router(payments.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/health")
