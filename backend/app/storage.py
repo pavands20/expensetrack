@@ -18,8 +18,13 @@ def _bucket() -> str:
 
 def _s3():
     import boto3
+    from botocore.config import Config
 
-    return boto3.client("s3", region_name=os.getenv("AWS_REGION") or None)
+    return boto3.client(
+        "s3",
+        region_name=os.getenv("AWS_REGION") or None,
+        config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}),
+    )
 
 
 def _media_path(key: str) -> Path:

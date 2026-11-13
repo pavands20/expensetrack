@@ -1,6 +1,6 @@
 import React from "react";
 
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, API_BASE_URL, ApiError } from "@/lib/api";
 
 const BAD_FILE = "Receipts must be JPEG, PNG or PDF files of 5 MB or less.";
 const LOCKED = "Receipts can't be changed once a claim is submitted";
@@ -66,7 +66,10 @@ export function ReceiptControl({
     setError("");
     try {
       const res = await apiFetch<{ url: string }>(`${base}-url`);
-      window.open(res.url, "_blank", "noopener,noreferrer");
+      const url = res.url.startsWith("/")
+        ? `${API_BASE_URL.replace(/\/+$/, "")}${res.url}`
+        : res.url;
+      window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setError("Could not open the receipt. Please try again.");
     }
