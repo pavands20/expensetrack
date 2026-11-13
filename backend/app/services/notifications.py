@@ -15,11 +15,7 @@ OUTCOMES = {"pending_finance": "approved by manager", "approved": "approved", "d
 
 def _send(claim: Claim, recipients: list[User], subject: str, body: str) -> None:
     for u in recipients:
-        try:
-            send_email(u.email, subject, body)
-        except Exception:
-            # Log the claim reference only: no address, no body.
-            logger.error("Failed to send notification email for claim %s", claim.reference)
+        send_email(u.email, subject, body)  # logs its own failures
 
 
 def notify_approvers(db: Session, claim: Claim) -> None:
@@ -28,10 +24,13 @@ def notify_approvers(db: Session, claim: Claim) -> None:
         owner = db.get(User, claim.owner_id)
         if owner is None:
             return
+        if claim.status not in ("pending_manager", "pending_finance"):
+            return
+        people: list[User] = []
         if claim.status == "pending_manager":
             mgr = db.get(User, owner.manager_id) if owner.manager_id is not None else None
             people = [mgr] if mgr is not None and mgr.is_active else []
-        elif claim.status == "pending_finance":
+        if not people:  # finance stage, or an orphaned manager stage Finance may decide
             people = list(
                 db.scalars(
                     select(User).where(
@@ -39,8 +38,6 @@ def notify_approvers(db: Session, claim: Claim) -> None:
                     )
                 )
             )
-        else:
-            return
         _send(
             claim,
             people,

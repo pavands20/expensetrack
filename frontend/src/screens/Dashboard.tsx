@@ -80,7 +80,7 @@ function DashboardView() {
     retry: false,
   });
 
-  const data = q.data;
+  const data = q.data?.claims && q.data?.counts ? q.data : undefined;
   const rows = data?.claims[active] ?? [];
   const total = data ? STATUSES.reduce((s, x) => s + data.counts[x.key], 0) : 0;
   const hasNone = !!data && total === 0;

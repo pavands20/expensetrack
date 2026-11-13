@@ -16,7 +16,7 @@ from sqlalchemy import (
     func,
     true,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column
 from sqlalchemy.types import DateTime, TypeDecorator
 
 from app.database import Base
@@ -145,7 +145,9 @@ event.listen(ClaimStatusChange, "before_update", _refuse)
 event.listen(ClaimStatusChange, "before_delete", _refuse)
 
 
-def record_status_change(db, claim, old, new, actor, comment=None) -> ClaimStatusChange:
+def record_status_change(
+    db: Session, claim: Claim, old: str, new: str, actor: User, comment: str | None = None
+) -> ClaimStatusChange:
     """Add an audit entry to the session; the caller commits with the status change."""
     entry = ClaimStatusChange(
         claim_id=claim.id,
