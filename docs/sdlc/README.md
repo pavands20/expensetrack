@@ -9,7 +9,7 @@ Managers and Finance staff also incur expenses. Who should approve a claim submi
 
 Assigned manager, then Finance
 
-**Documentation version:** v16
+**Documentation version:** v17
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -22,7 +22,7 @@ Assigned manager, then Finance
 | [Planning](planning/README.md) | 0 entries |
 | [Development](development/README.md) | 4 entries |
 | [Testing](testing/README.md) | 2 entries |
-| [Deployment](deployment/README.md) | 3 entries |
+| [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
 | [Data model](architecture/data-model.md) | generated |
 | [API (OpenAPI)](architecture/api/openapi.yaml) | generated |
@@ -34,7 +34,7 @@ Assigned manager, then Finance
 | [Tests](testing/test-cases.md) | 168 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
-| [Release notes](deployment/release-notes.md) | 3 releases |
+| [Release notes](deployment/release-notes.md) | 4 releases |
 | [Traceability matrix](traceability-matrix.md) | 27 requirements |
-| [Changelog](CHANGELOG.md) | 16 versions |
+| [Changelog](CHANGELOG.md) | 17 versions |
 <!-- sdlc:auto:end contents -->

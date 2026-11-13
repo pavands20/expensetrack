@@ -3,6 +3,16 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 0afa666a9ac7 — 2026-11-13
+
+**Commit:** `0afa666`
+
+**Delivered:**
+- US-004: Role-based visibility of claims
+- US-009: Edit a draft claim
+- US-011: Upload a receipt to a claim line
+- US-013: Submit a claim and lock it
+
 ## 2045c76e01ce — 2026-11-11
 
 **Commit:** `2045c76`
