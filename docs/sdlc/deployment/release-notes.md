@@ -3,6 +3,18 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 8995e4b14ec6 — 2026-11-13
+
+**Commit:** `8995e4b`
+
+**Delivered:**
+- US-016: Mark an approved claim as paid
+- US-018: Rejected claim returns to the employee to fix and resubmit
+- US-020: Flag over-limit lines for approvers
+- US-021: Employee dashboard of own claims by status
+- US-023: Export approved claims as CSV with a date range
+- US-024: Email notifications on submission and decisions
+
 ## 976fbed0326e — 2026-11-13
 
 **Commit:** `976fbed`
