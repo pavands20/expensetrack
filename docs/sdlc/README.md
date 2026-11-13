@@ -9,7 +9,7 @@ Managers and Finance staff also incur expenses. Who should approve a claim submi
 
 Assigned manager, then Finance
 
-**Documentation version:** v26
+**Documentation version:** v27
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -29,12 +29,12 @@ Assigned manager, then Finance
 | [Decisions (ADRs)](architecture/adr/README.md) | 6 decisions |
 | [Sprint plan](development/sprint-plan.md) | 6 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
-| [API reference](development/api-reference.md) | 31 routes |
+| [API reference](development/api-reference.md) | 32 routes |
 | [Test report](testing/test-report.md) | passed |
 | [Tests](testing/test-cases.md) | 332 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 7 releases |
 | [Traceability matrix](traceability-matrix.md) | 27 requirements |
-| [Changelog](CHANGELOG.md) | 26 versions |
+| [Changelog](CHANGELOG.md) | 27 versions |
 <!-- sdlc:auto:end contents -->
