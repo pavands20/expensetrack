@@ -159,7 +159,10 @@ test("[AC-081] rejected claim opens as an editable draft showing the approver's 
   await signInUi(page, emp.email, emp.password);
   await page.getByRole("tab", { name: /Draft/ }).click();
   await expect(page.getByText(c.reference).first()).toBeVisible();
-  await page.getByRole("link", { name: new RegExp(c.reference) }).first().click();
+  await page
+    .getByRole("link", { name: new RegExp(c.reference) })
+    .first()
+    .click();
   await expect(page).toHaveURL(new RegExp(`/claims/${c.id}`));
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Draft");
   await expect(page.getByText(comment).first()).toBeVisible();
