@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    event,
     func,
     true,
 )
@@ -25,7 +26,9 @@ __all__ = [
     "Category",
     "Claim",
     "ClaimLine",
+    "ClaimStatusChange",
     "PasswordResetToken",
+    "record_status_change",
     "User",
     "UserSession",
     "utcnow",
@@ -109,6 +112,43 @@ class ClaimLine(Base):
     description: Mapped[str] = mapped_column(String(140))
     receipt_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ClaimStatusChange(Base):
+    """Append-only audit entry. claim_id is deliberately not a foreign key."""
+
+    __tablename__ = "claim_status_changes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    claim_id: Mapped[int] = mapped_column(Integer, index=True)
+    old_status: Mapped[str] = mapped_column(String(20))
+    new_status: Mapped[str] = mapped_column(String(20))
+    actor_id: Mapped[int] = mapped_column(Integer)
+    actor_name: Mapped[str] = mapped_column(String(200))
+    comment: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+def _refuse(*_args) -> None:
+    raise RuntimeError("Audit entries cannot be changed or deleted")
+
+
+event.listen(ClaimStatusChange, "before_update", _refuse)
+event.listen(ClaimStatusChange, "before_delete", _refuse)
+
+
+def record_status_change(db, claim, old, new, actor, comment=None) -> ClaimStatusChange:
+    """Add an audit entry to the session; the caller commits with the status change."""
+    entry = ClaimStatusChange(
+        claim_id=claim.id,
+        old_status=old,
+        new_status=new,
+        actor_id=actor.id,
+        actor_name=actor.name,
+        comment=comment,
+    )
+    db.add(entry)
+    return entry
 
 
 Index("uq_categories_name_lower", func.lower(Category.name), unique=True)

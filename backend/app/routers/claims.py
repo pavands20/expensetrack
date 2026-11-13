@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from app import storage
 from app.database import get_db
-from app.deps import require_auth
-from app.models import Category, Claim, ClaimLine, User, utcnow
-from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut, LinePatchIn
+from app.deps import aware, require_auth
+from app.models import Category, Claim, ClaimLine, ClaimStatusChange, User, utcnow
+from app.schemas import ClaimCreateIn, ClaimOut, LineIn, LineOut, LinePatchIn, RejectionOut
 from app.services.claims import visible_claims
 
 router = APIRouter(prefix="/api/claims")
@@ -34,6 +34,23 @@ def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
         u.id: u.name
         for u in db.scalars(select(User).where(User.id.in_({c.owner_id for c in claims})))
     }
+    rejections: dict[int, RejectionOut] = {}
+    drafts = [c.id for c in claims if c.status == "draft"]
+    if drafts:
+        for r in db.scalars(
+            select(ClaimStatusChange)
+            .where(
+                ClaimStatusChange.claim_id.in_(drafts),
+                ClaimStatusChange.new_status == "draft",
+                ClaimStatusChange.old_status != "draft",
+            )
+            .order_by(ClaimStatusChange.created_at, ClaimStatusChange.id)
+        ):
+            rejections[r.claim_id] = RejectionOut(
+                comment=r.comment or "",
+                decided_by_name=r.actor_name,
+                decided_at=aware(r.created_at).isoformat(),
+            )
     result = []
     for claim in claims:
         pairs = by_claim.get(claim.id, [])
@@ -57,10 +74,13 @@ def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
                         amount_gbp=f"{Decimal(ln.amount):.2f}",
                         description=ln.description,
                         has_receipt=bool(ln.receipt_key),
+                        over_limit=cat.limit_gbp is not None
+                        and Decimal(ln.amount) > Decimal(cat.limit_gbp),
                     )
                     for ln, cat in pairs
                 ],
                 total_gbp=f"{total:.2f}",
+                last_rejection=rejections.get(claim.id),
             )
         )
     return result
@@ -90,9 +110,10 @@ def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
         raise HTTPException(status_code=403, detail="Forbidden")
     # Row lock serialises concurrent edits and submits; status is read after the lock.
     status = db.scalar(
-        select(Claim.status).where(Claim.id == claim.id).with_for_update().execution_options(
-            populate_existing=True
-        )
+        select(Claim.status)
+        .where(Claim.id == claim.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
     )
     if status != "draft":
         raise HTTPException(status_code=409, detail=message)

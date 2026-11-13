@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import require_auth
-from app.models import Claim, ClaimLine, User, utcnow
-from app.routers.claims import _out, _outs, _own_draft
-from app.schemas import ClaimOut
+from app.models import Claim, ClaimLine, User, record_status_change, utcnow
+from app.routers.claims import _out, _outs, _own_draft, _visible_claim
+from app.schemas import ClaimOut, DecisionIn
+from app.services.decisions import assert_not_submitter
 
 router = APIRouter()
 
@@ -37,7 +38,47 @@ def submit_claim(
             },
         )
     mgr = db.get(User, user.manager_id) if user.manager_id is not None else None
-    claim.status = "pending_manager" if mgr is not None and mgr.is_active else "pending_finance"
+    new = "pending_manager" if mgr is not None and mgr.is_active else "pending_finance"
+    record_status_change(db, claim, claim.status, new, user)
+    claim.status = new
+    claim.updated_at = utcnow()
+    db.commit()
+    return _out(db, claim)
+
+
+@router.post("/api/claims/{claim_id}/decision", response_model=ClaimOut)
+def decide_claim(
+    claim_id: int,
+    body: DecisionIn,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+) -> ClaimOut:
+    claim = _visible_claim(db, claim_id, user)
+    assert_not_submitter(claim, user)
+    if user.role not in ("Manager", "Finance"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if user.role == "Manager":
+        owner = db.get(User, claim.owner_id)
+        if owner is None or owner.manager_id != user.id:
+            raise HTTPException(status_code=403, detail="Forbidden")
+    stage = "pending_manager" if user.role == "Manager" else "pending_finance"
+    status = db.scalar(
+        select(Claim.status)
+        .where(Claim.id == claim.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if status != stage:
+        raise HTTPException(status_code=409, detail="Claim is not awaiting your decision")
+    comment = (body.comment or "").strip() or None
+    if body.decision == "reject":
+        if comment is None:
+            raise HTTPException(status_code=422, detail="A comment is required to reject a claim")
+        new = "draft"
+    else:
+        new = "pending_finance" if user.role == "Manager" else "approved"
+    record_status_change(db, claim, stage, new, user, comment)
+    claim.status = new
     claim.updated_at = utcnow()
     db.commit()
     return _out(db, claim)

@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch, ApiError } from "@/lib/api";
 import { brand } from "@/lib/brand";
 import { Icons } from "@/lib/icons";
+import { ApprovalPanel } from "@/components/ApprovalPanel";
+import { ClaimHistory } from "@/components/ClaimHistory";
 import { LineEditor } from "@/components/LineEditor";
 import { ReceiptControl } from "@/components/ReceiptControl";
 import { SubmitClaim } from "@/components/SubmitClaim";
@@ -17,7 +19,9 @@ type Line = {
   amount_gbp: string;
   description: string;
   has_receipt?: boolean;
+  over_limit?: boolean;
 };
+type Rejection = { comment: string; decided_by_name: string; decided_at: string };
 type ClaimData = {
   id: number;
   reference: string;
@@ -28,6 +32,7 @@ type ClaimData = {
   created_at: string;
   lines: Line[];
   total_gbp: string;
+  last_rejection?: Rejection | null;
 };
 type Category = { id: number; name: string; limit_gbp: string | null; is_active: boolean };
 type Form = { date: string; category: string; amount: string; description: string };
@@ -336,6 +341,17 @@ export default function Screen() {
           {notice}
         </div>
 
+        {claim && claim.status === "draft" && claim.last_rejection && (
+          <section role="note" className="xt-glass" style={{ padding: 24 }} data-testid="rejection">
+            <h2 className="xt-h2">Returned for changes</h2>
+            <p>“{claim.last_rejection.comment}”</p>
+            <p className="xt-meta">
+              {claim.last_rejection.decided_by_name} ·{" "}
+              {new Date(claim.last_rejection.decided_at).toLocaleString()}
+            </p>
+          </section>
+        )}
+
         <section className="xt-glass" style={{ padding: 24 }} aria-labelledby="lines-h">
           <h2 className="xt-h2" id="lines-h" style={{ marginBottom: 16 }}>
             Claim lines
@@ -373,7 +389,18 @@ export default function Screen() {
                     <td className="num" style={{ fontWeight: 700 }}>
                       {gbp(l.amount_gbp)}
                     </td>
-                    <td style={{ maxWidth: 280 }}>{l.description}</td>
+                    <td style={{ maxWidth: 280 }}>
+                      {l.description}
+                      {l.over_limit && (
+                        <strong
+                          data-testid={`over-limit-${l.id}`}
+                          className="xt-cat"
+                          style={{ marginLeft: 8, borderStyle: "dashed", borderColor: "var(--a)" }}
+                        >
+                          Over limit
+                        </strong>
+                      )}
+                    </td>
                     {!locked && (
                       <td>
                         <LineEditor
@@ -407,6 +434,10 @@ export default function Screen() {
             </span>
           </div>
         </section>
+
+        {claim && <ApprovalPanel claim={claim} onDecided={setClaim} />}
+
+        {claim && <ClaimHistory claimId={claim.id} version={claim.status} />}
 
         {!locked && (
           <>
