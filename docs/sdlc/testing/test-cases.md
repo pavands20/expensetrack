@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-168 tests · Passed 168 · Failed 0 · Skipped 0 · Not run 0
+219 tests · Passed 219 · Failed 0 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 44/102 · passing: 44/102
+Acceptance criteria covered: 64/102 · passing: 64/102
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -225,10 +225,73 @@ Acceptance criteria covered: 44/102 · passing: 44/102
 | AC-050 | [AC-050] Employee with a manager: claim is in manager queue, not Finance's | E2E | Passed | `frontend/e2e/submit.spec.ts` |
 | AC-051 | [AC-051] no manager: Finance other than owner sees it; owner does not | E2E | Passed | `frontend/e2e/submit.spec.ts` |
 
+## Sprint 4
+
+### US-012: View receipts through short-lived private links
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-044 | test_ac044_owner_manager_finance_get_working_link | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-045, AC-047 | test_ac045_ac047_s3_presigned_short_and_bucket_private | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-045 | test_ac045_expired_local_link_not_served | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-046 | test_ac046_unauthorised_users_get_404_and_unauth_401 | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-047 | test_ac047_direct_object_access_needs_valid_signature | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-047 | test_ac047_storage_module_sets_no_public_acl | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| NFR-006, NFR-008 | test_nfr006_nfr008_no_permanent_url_in_response_or_logs | Integration | Passed | `backend/tests/integration/test_receipt_links_acceptance_qa.py` |
+| AC-044 | [AC-044] View receipt opens the receipt for the owner | E2E | Passed | `frontend/e2e/receipt-view.spec.ts` |
+
+### US-014: Manager approves or rejects direct reports' claims
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-050 | approvals UI > [AC-050] a 403 shows a friendly message | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-050 | approvals UI > [AC-050] an empty queue shows the empty state | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-050 | approvals UI > [AC-050] the queue lists rows linking to the claim | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-052 | approvals UI > [AC-052] approve posts the decision and passes the claim on | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-053, AC-056 | approvals UI > [AC-053] [AC-056] a returned draft shows the rejection banner and over-limit flag | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-054 | approvals UI > [AC-054] a 422 shows the comment message | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-054 | approvals UI > [AC-054] reject with a blank comment is blocked client-side | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-055 | approvals UI > [AC-055] the panel is not rendered for the submitter | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-059 | approvals UI > [AC-059] a 409 shows a refusal and does not change the claim | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-096 | approvals UI > [AC-096] history lists entries in order with no edit controls | Unit | Passed | `frontend/src/components/ApprovalPanel.test.tsx` |
+| AC-052 | test_ac052_manager_approve_moves_to_finance_with_decider | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-053 | test_ac053_manager_reject_with_comment_returns_editable_draft | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-054 | test_ac054_reject_without_comment_422[   ] | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-054 | test_ac054_reject_without_comment_422[None] | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-054 | test_ac054_reject_without_comment_422[] | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-055 | test_ac055_manager_own_and_non_report_claims_refused | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-056, AC-061 | test_ac056_ac061_over_limit_flag_for_manager_and_finance | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-057 | test_ac057_finance_approve_records_name_time_comment | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-058 | test_ac058_finance_reject_returns_draft_with_comment | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-059 | test_ac059_submitter_refused_by_finance_stage | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-060 | test_ac060_sole_finance_own_claim_waits_for_second_finance | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-066, NFR-005 | test_ac066_nfr005_every_role_refused_own_claim_unchanged | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-067 | test_ac067_manager_claim_routes_to_manager_then_finance | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-068 | test_ac068_finance_claim_decided_only_by_other_finance | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-095 | test_ac095_submit_approve_reject_write_entries | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-096 | test_ac096_history_time_ordered_and_404_when_invisible | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-097, NFR-009 | test_ac097_nfr009_entries_keep_actor_name_after_deactivation | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| AC-097 | test_ac097_no_edit_or_delete_route_for_history | Integration | Passed | `backend/tests/integration/test_approval_flow_qa.py` |
+| NFR-008 | test_nfr008_employee_forbidden_from_users_and_queue | Integration | Passed | `backend/tests/integration/test_privacy_access.py` |
+| NFR-008 | test_nfr008_invisible_claim_is_404 | Integration | Passed | `backend/tests/integration/test_privacy_access.py` |
+| NFR-008 | test_nfr008_unauthenticated_gets_401 | Integration | Passed | `backend/tests/integration/test_privacy_access.py` |
+| AC-095 | test_ac095_helper_does_not_commit | Integration | Passed | `backend/tests/test_audit.py` |
+| AC-095 | test_ac095_submit_writes_entry | Integration | Passed | `backend/tests/test_audit.py` |
+| AC-096 | test_ac096_visibility_and_order | Integration | Passed | `backend/tests/test_audit.py` |
+| AC-097 | test_ac097_no_mutation | Integration | Passed | `backend/tests/test_audit.py` |
+| NFR-009 | test_nfr009_name_kept_after_deactivation | Integration | Passed | `backend/tests/test_audit.py` |
+| AC-052, AC-057 | test_ac052_ac057_approve_chain | Integration | Passed | `backend/tests/test_decisions.py` |
+| AC-053, AC-054, AC-058 | test_ac053_ac054_ac058_reject | Integration | Passed | `backend/tests/test_decisions.py` |
+| AC-055, AC-059 | test_ac055_ac059_self_and_non_report | Integration | Passed | `backend/tests/test_decisions.py` |
+| AC-056 | test_ac056_over_limit | Integration | Passed | `backend/tests/test_decisions.py` |
+| AC-059 | test_ac059_helper_and_invalid_decision | Integration | Passed | `backend/tests/test_decisions.py` |
+| AC-060, AC-068 | test_ac060_ac068_finance_own_claim | Integration | Passed | `backend/tests/test_decisions.py` |
+
 ## Project setup
 
 | Criteria | Test | Level | Result | File |
 |---|---|---|---|---|
+| AC-096 | test_ac096_timestamps_load_timezone_aware | Unit | Passed | `backend/tests/test_utc_datetime.py` |
 | — | test_health_reports_ok | Integration | Passed | `backend/tests/test_health.py` |
 | — | test_the_openapi_document_builds | Integration | Passed | `backend/tests/test_health.py` |
 | — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |
