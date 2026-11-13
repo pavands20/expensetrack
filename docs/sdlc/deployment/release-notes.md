@@ -3,6 +3,15 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## d2e70dd6d3c7 — 2026-11-13
+
+**Commit:** `d2e70dd`
+
+**Delivered:**
+- US-022: Finance totals by category and month
+- US-026: Setup and configuration guide
+- US-027: User guide for each role
+
 ## 8995e4b14ec6 — 2026-11-13
 
 **Commit:** `8995e4b`

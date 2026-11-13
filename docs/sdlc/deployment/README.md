@@ -3,28 +3,22 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEP-8995e4b14ec6 · draft · source: deployment:8995e4b14ec6
+### DEP-d2e70dd6d3c7 · draft · source: deployment:d2e70dd6d3c7
 
-ExpenseTrack version 8995e4b14ec6 is reported as live. The frontend and backend are each served from their own URL. No date, approver or verification results were provided for this deployment.
+ExpenseTrack version d2e70dd6d3c7 is deployed and reported as live. The React frontend is hosted on AWS Amplify, and the FastAPI backend is served from a separate host. No date, approver or verification results were provided.
 
-What the input states:
 - Deployment status (as reported): live
-- Version: 8995e4b14ec6
-- Frontend URL: https://p4953884a2951.d3j61xaup4zgrx.amplifyapp.com
+- Version: d2e70dd6d3c7
+- Frontend URL: https://p4953884a2951.d3j61xaup4zgrx.amplifyapp.com (AWS Amplify hosting)
 - Backend URL: https://54-212-142-216.sslip.io/apps/4953884a2951/
-
-Notes:
-- The input reports status 'live', which is not one of this schema's status values. The entry is marked 'draft' because no approval or sign-off record was provided. It should not be read as a formally approved release.
-- The frontend host is an AWS Amplify domain. The backend is served from an sslip.io hostname that resolves to an IP address. The input does not say which AWS service hosts the backend.
-- The input does not identify the stories (US-001 to US-027) or tickets included in this version, so no related_ids are linked.
-
-Not provided in the input (left undocumented):
-- Deployment date and time
-- Who deployed or approved the deployment
-- Release notes or changelog
-- Post-deployment smoke-test or health-check results
-- Database migration details for PostgreSQL
-- S3 receipt storage configuration
-- Environment name (e.g. staging vs production)
-- Rollback plan
+- Stated target stack (from the project description): React frontend, FastAPI backend, PostgreSQL, S3 for receipt storage, on AWS
+- Not provided in the input, so not recorded:
+  - Deployment date and time
+  - Who performed or approved the deployment
+  - Which tickets or requirements this version contains
+  - Smoke-test or health-check results
+  - Database migration details
+  - S3 bucket configuration
+  - Rollback plan
+- Entry status is 'draft' because the input reports the operational state 'live' but no document approval. A human should confirm and approve this record.
 <!-- sdlc:auto:end narrative -->
