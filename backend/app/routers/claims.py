@@ -145,18 +145,7 @@ def add_line(
     db: Session = Depends(get_db),
 ) -> ClaimOut:
     claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
-    cat = db.get(Category, body.category_id)
-    if cat is None or not cat.is_active:
-        raise HTTPException(
-            status_code=422,
-            detail=[
-                {
-                    "loc": ["body", "category_id"],
-                    "msg": "Unknown or retired category",
-                    "type": "value_error",
-                }
-            ],
-        )
+    cat = _active_category(db, body.category_id)
     claim.updated_at = utcnow()
     db.add(
         ClaimLine(
@@ -169,6 +158,22 @@ def add_line(
     )
     db.commit()
     return _out(db, claim)
+
+
+def _active_category(db: Session, category_id: int) -> Category:
+    cat = db.get(Category, category_id)
+    if cat is None or not cat.is_active:
+        raise HTTPException(
+            status_code=422,
+            detail=[
+                {
+                    "loc": ["body", "category_id"],
+                    "msg": "Unknown or retired category",
+                    "type": "value_error",
+                }
+            ],
+        )
+    return cat
 
 
 def _claim_line(db: Session, claim_id: int, line_id: int) -> ClaimLine:
@@ -191,19 +196,7 @@ def patch_line(
     claim = _own_draft(db, claim_id, user, "Only draft claims can be changed")
     line = _claim_line(db, claim_id, line_id)
     if body.category_id is not None and body.category_id != line.category_id:
-        cat = db.get(Category, body.category_id)
-        if cat is None or not cat.is_active:
-            raise HTTPException(
-                status_code=422,
-                detail=[
-                    {
-                        "loc": ["body", "category_id"],
-                        "msg": "Unknown or retired category",
-                        "type": "value_error",
-                    }
-                ],
-            )
-        line.category_id = cat.id
+        line.category_id = _active_category(db, body.category_id).id
     if body.date is not None:
         line.date = body.date
     if body.amount_gbp is not None:
