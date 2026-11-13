@@ -24,9 +24,7 @@ def people(client, db_session):
         _mk(db_session, pw, f"{n}@x.com", role)
     h = {}
     for n in ("e1", "e2", "f"):
-        r = client.post(
-            "/api/auth/login", json={"email": f"{n}@x.com", "password": pw}
-        )
+        r = client.post("/api/auth/login", json={"email": f"{n}@x.com", "password": pw})
         h[n] = {"Authorization": f"Bearer {r.json()['token']}"}
     return h
 
