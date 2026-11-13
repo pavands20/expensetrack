@@ -10,6 +10,7 @@ from app.models import Claim, ClaimLine, User, record_status_change, utcnow
 from app.routers.claims import _out, _outs, _own_draft, _visible_claim
 from app.schemas import ClaimOut, DecisionIn
 from app.services.decisions import assert_not_submitter
+from app.services.notifications import OUTCOMES, notify_approvers, notify_submitter
 
 router = APIRouter()
 
@@ -43,6 +44,7 @@ def submit_claim(
     claim.status = new
     claim.updated_at = utcnow()
     db.commit()
+    notify_approvers(db, claim)
     return _out(db, claim)
 
 
@@ -81,6 +83,9 @@ def decide_claim(
     claim.status = new
     claim.updated_at = utcnow()
     db.commit()
+    notify_submitter(db, claim, OUTCOMES[new], comment)
+    if new == "pending_finance":
+        notify_approvers(db, claim)
     return _out(db, claim)
 
 

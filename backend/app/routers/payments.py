@@ -10,6 +10,7 @@ from app.models import Claim, User, record_status_change, utcnow
 from app.routers.claims import _out, _visible_claim
 from app.schemas import ClaimOut
 from app.services.decisions import assert_not_submitter
+from app.services.notifications import notify_submitter
 
 router = APIRouter()
 
@@ -34,4 +35,5 @@ def mark_paid(
     claim.status = "paid"
     claim.updated_at = utcnow()
     db.commit()
+    notify_submitter(db, claim, "paid")
     return _out(db, claim)
