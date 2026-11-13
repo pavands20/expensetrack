@@ -55,6 +55,9 @@ def patch_user(user_id: int, body: UserPatchIn, db: Session = Depends(get_db)) -
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    for field in ("name", "role"):
+        if field in body.model_fields_set and getattr(body, field) is None:
+            raise HTTPException(status_code=422, detail=f"{field} cannot be null")
     if "manager_id" in body.model_fields_set:
         check_manager(db, body.manager_id, user_id)
         user.manager_id = body.manager_id

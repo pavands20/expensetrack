@@ -275,8 +275,7 @@ def check_bucket(needs_endpoint):
         **keys,
     )
     try:
-        owner = setting("S3_BUCKET_OWNER")
-        client.head_bucket(Bucket=bucket, **({"ExpectedBucketOwner": owner} if owner else {}))
+        client.head_bucket(Bucket=bucket)
     except NoCredentialsError:
         return False, "no AWS credentials found"
     except ClientError as exc:

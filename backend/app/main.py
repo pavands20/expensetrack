@@ -15,34 +15,54 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from alembic import command
-from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
-from app.routers import approvals, auth, categories, claims, history, receipts, users
+from app.routers import (
+    approvals,
+    auth,
+    categories,
+    claims,
+    dashboard,
+    history,
+    payments,
+    receipts,
+    reports,
+    users,
+)
 from app.security import hash_password
 from app.services.categories import seed_categories
 
 _BACKEND = Path(__file__).resolve().parent.parent
 
 
-def _seed_admin() -> None:
-    """Create the first Finance user from the bootstrap settings, once."""
-    email = os.getenv("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
-    password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
-    if not email or not password:
+def _seed_user(email_var: str, secret_var: str, name: str, role: str) -> None:
+    """Create one user from a pair of settings, once; seed nothing when unset."""
+    email = os.getenv(email_var, "").strip().lower()
+    secret = os.getenv(secret_var, "")
+    if not email or not secret:
         return
     with SessionLocal() as db:
         if db.scalar(select(User).where(User.email == email)) is None:
             db.add(
                 User(
-                    name="Finance Admin",
+                    name=name,
                     email=email,
-                    password_hash=hash_password(password),
-                    role="Finance",
+                    password_hash=hash_password(secret),
+                    role=role,
                     is_active=True,
                 )
             )
             db.commit()
+
+
+def _seed_admin() -> None:
+    """Create the first Finance user from the bootstrap settings, once."""
+    _seed_user("BOOTSTRAP_ADMIN_EMAIL", "BOOTSTRAP_ADMIN_PASSWORD", "Finance Admin", "Finance")
+
+
+def _seed_smoke() -> None:
+    """Create one Employee from the smoke-test settings, once."""
+    _seed_user("SMOKE_TEST_EMAIL", "SMOKE_TEST_PASSWORD", "Smoke Test", "Employee")
 
 
 @asynccontextmanager
@@ -52,6 +72,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
     command.upgrade(cfg, "head")
     _seed_admin()
+    _seed_smoke()
     seed_categories()
     yield
 
@@ -89,6 +110,9 @@ app.include_router(claims.router)
 app.include_router(receipts.router)
 app.include_router(approvals.router)
 app.include_router(history.router)
+app.include_router(payments.router)
+app.include_router(dashboard.router)
+app.include_router(reports.router)
 
 
 @app.get("/health")

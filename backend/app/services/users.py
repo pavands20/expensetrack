@@ -55,7 +55,7 @@ def create_reset_link(db: Session, user: User) -> str:
             expires_at=utcnow() + timedelta(minutes=reset_minutes()),
         )
     )
-    db.commit()
+    db.flush()
     return f"{frontend_base_url()}/reset-password?token={token}"
 
 
@@ -64,6 +64,7 @@ def send_reset_email(
 ) -> None:
     """Create the link now; deliver the email after the response is sent."""
     link = create_reset_link(db, user)
+    db.commit()
     background.add_task(send_email, user.email, subject, f"{subject}: {link}")
 
 

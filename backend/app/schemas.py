@@ -108,6 +108,7 @@ class LineOut(BaseModel):
     description: str
     has_receipt: bool = False
     over_limit: bool = False
+    category_limit_gbp: str | None = None
 
 
 class RejectionOut(BaseModel):

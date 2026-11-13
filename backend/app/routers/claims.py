@@ -63,7 +63,7 @@ def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
                 status=claim.status,
                 owner_id=claim.owner_id,
                 owner_name=owners.get(claim.owner_id, ""),
-                created_at=claim.created_at.isoformat(),
+                created_at=aware(claim.created_at).isoformat(),
                 lines=[
                     LineOut(
                         id=ln.id,
@@ -76,6 +76,9 @@ def _outs(db: Session, claims: list[Claim]) -> list[ClaimOut]:
                         has_receipt=bool(ln.receipt_key),
                         over_limit=cat.limit_gbp is not None
                         and Decimal(ln.amount) > Decimal(cat.limit_gbp),
+                        category_limit_gbp=None
+                        if cat.limit_gbp is None
+                        else f"{Decimal(cat.limit_gbp):.2f}",
                     )
                     for ln, cat in pairs
                 ],
@@ -104,18 +107,22 @@ def _visible_claim(db: Session, claim_id: int, user: User) -> Claim:
     return claim
 
 
+def locked_status(db: Session, claim_id: int) -> str | None:
+    """Re-read a claim's status under a row lock, bypassing the identity map."""
+    return db.scalar(
+        select(Claim.status)
+        .where(Claim.id == claim_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+
+
 def _own_draft(db: Session, claim_id: int, user: User, message: str) -> Claim:
     claim = _visible_claim(db, claim_id, user)
     if claim.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
     # Row lock serialises concurrent edits and submits; status is read after the lock.
-    status = db.scalar(
-        select(Claim.status)
-        .where(Claim.id == claim.id)
-        .with_for_update()
-        .execution_options(populate_existing=True)
-    )
-    if status != "draft":
+    if locked_status(db, claim.id) != "draft":
         raise HTTPException(status_code=409, detail=message)
     return claim
 

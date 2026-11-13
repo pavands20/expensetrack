@@ -1,15 +1,16 @@
 """Claim submission and the approvals queue."""
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, select
+from sqlalchemy.orm import Session, aliased
 
 from app.database import get_db
 from app.deps import require_auth
 from app.models import Claim, ClaimLine, User, record_status_change, utcnow
-from app.routers.claims import _out, _outs, _own_draft, _visible_claim
+from app.routers.claims import _out, _outs, _own_draft, _visible_claim, locked_status
 from app.schemas import ClaimOut, DecisionIn
 from app.services.decisions import assert_not_submitter
+from app.services.notifications import OUTCOMES, notify_approvers, notify_submitter
 
 router = APIRouter()
 
@@ -43,7 +44,15 @@ def submit_claim(
     claim.status = new
     claim.updated_at = utcnow()
     db.commit()
+    notify_approvers(db, claim)
     return _out(db, claim)
+
+
+def _has_manager(db: Session, owner: User | None) -> bool:
+    if owner is None or owner.manager_id is None:
+        return False
+    mgr = db.get(User, owner.manager_id)
+    return mgr is not None and mgr.is_active
 
 
 @router.post("/api/claims/{claim_id}/decision", response_model=ClaimOut)
@@ -57,17 +66,13 @@ def decide_claim(
     assert_not_submitter(claim, user)
     if user.role not in ("Manager", "Finance"):
         raise HTTPException(status_code=403, detail="Forbidden")
-    if user.role == "Manager":
-        owner = db.get(User, claim.owner_id)
-        if owner is None or owner.manager_id != user.id:
-            raise HTTPException(status_code=403, detail="Forbidden")
+    owner = db.get(User, claim.owner_id)
+    if user.role == "Manager" and (owner is None or owner.manager_id != user.id):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    status = locked_status(db, claim.id)
     stage = "pending_manager" if user.role == "Manager" else "pending_finance"
-    status = db.scalar(
-        select(Claim.status)
-        .where(Claim.id == claim.id)
-        .with_for_update()
-        .execution_options(populate_existing=True)
-    )
+    if user.role == "Finance" and status == "pending_manager" and not _has_manager(db, owner):
+        stage = "pending_manager"  # orphaned manager stage: Finance decides it
     if status != stage:
         raise HTTPException(status_code=409, detail="Claim is not awaiting your decision")
     comment = (body.comment or "").strip() or None
@@ -76,11 +81,14 @@ def decide_claim(
             raise HTTPException(status_code=422, detail="A comment is required to reject a claim")
         new = "draft"
     else:
-        new = "pending_finance" if user.role == "Manager" else "approved"
+        new = "pending_finance" if stage == "pending_manager" else "approved"
     record_status_change(db, claim, stage, new, user, comment)
     claim.status = new
     claim.updated_at = utcnow()
     db.commit()
+    notify_submitter(db, claim, OUTCOMES[new], comment)
+    if new == "pending_finance":
+        notify_approvers(db, claim)
     return _out(db, claim)
 
 
@@ -97,7 +105,22 @@ def queue(user: User = Depends(require_auth), db: Session = Depends(get_db)) -> 
             )
         )
     elif user.role == "Finance":
-        q = select(Claim).where(Claim.status == "pending_finance", Claim.owner_id != user.id)
+        mgr = aliased(User)
+        q = (
+            select(Claim)
+            .join(User, User.id == Claim.owner_id)
+            .outerjoin(mgr, mgr.id == User.manager_id)
+            .where(
+                Claim.owner_id != user.id,
+                or_(
+                    Claim.status == "pending_finance",
+                    and_(
+                        Claim.status == "pending_manager",
+                        or_(mgr.id.is_(None), mgr.is_active.is_(False)),
+                    ),
+                ),
+            )
+        )
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
     q = q.order_by(Claim.created_at.desc(), Claim.id.desc())

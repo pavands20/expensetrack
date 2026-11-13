@@ -11,6 +11,7 @@ type Row = {
   owner_name: string;
   total_gbp: string;
   status: string;
+  lines?: { over_limit?: boolean }[];
 };
 
 const label = (s: string) => s.replace(/_/g, " ");
@@ -31,9 +32,7 @@ function Queue() {
     <div className="mx-auto grid max-w-5xl gap-6 p-6">
       <h1 className="text-2xl font-bold">Approvals</h1>
       {q.isLoading && <p role="status">Loading…</p>}
-      {q.isError && !(q.error instanceof ApiError && q.error.status === 403) && (
-        <p role="alert">Could not load the approvals queue.</p>
-      )}
+      {q.isError && <p role="alert">Could not load the approvals queue.</p>}
       {q.data && q.data.length === 0 && (
         <Empty title="Nothing waiting for you" description="No claims await your decision." />
       )}
@@ -52,6 +51,11 @@ function Queue() {
               <TR key={r.id} data-testid={`queue-${r.id}`}>
                 <TD>
                   <Link to={`/claims/${r.id}`}>{r.reference}</Link>
+                  {r.lines?.some((l) => l.over_limit) && (
+                    <strong data-testid={`queue-over-limit-${r.id}`} style={{ marginLeft: 8 }}>
+                      Over limit
+                    </strong>
+                  )}
                 </TD>
                 <TD>{r.owner_name}</TD>
                 <TD>£{r.total_gbp}</TD>
