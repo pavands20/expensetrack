@@ -15,7 +15,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from alembic import command
-from app import models  # noqa: F401 -- imported so the tables register
 from app.database import SessionLocal
 from app.models import User
 from app.routers import (
@@ -36,44 +35,34 @@ from app.services.categories import seed_categories
 _BACKEND = Path(__file__).resolve().parent.parent
 
 
-def _seed_admin() -> None:
-    """Create the first Finance user from the bootstrap settings, once."""
-    email = os.getenv("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
-    password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
-    if not email or not password:
-        return
-    with SessionLocal() as db:
-        if db.scalar(select(User).where(User.email == email)) is None:
-            db.add(
-                User(
-                    name="Finance Admin",
-                    email=email,
-                    password_hash=hash_password(password),
-                    role="Finance",
-                    is_active=True,
-                )
-            )
-            db.commit()
-
-
-def _seed_smoke() -> None:
-    """Create one Employee from the smoke-test settings, once."""
-    email = os.getenv("SMOKE_TEST_EMAIL", "").strip().lower()
-    secret = os.getenv("SMOKE_TEST_PASSWORD", "")
+def _seed_user(email_var: str, secret_var: str, name: str, role: str) -> None:
+    """Create one user from a pair of settings, once; seed nothing when unset."""
+    email = os.getenv(email_var, "").strip().lower()
+    secret = os.getenv(secret_var, "")
     if not email or not secret:
         return
     with SessionLocal() as db:
         if db.scalar(select(User).where(User.email == email)) is None:
             db.add(
                 User(
-                    name="Smoke Test",
+                    name=name,
                     email=email,
                     password_hash=hash_password(secret),
-                    role="Employee",
+                    role=role,
                     is_active=True,
                 )
             )
             db.commit()
+
+
+def _seed_admin() -> None:
+    """Create the first Finance user from the bootstrap settings, once."""
+    _seed_user("BOOTSTRAP_ADMIN_EMAIL", "BOOTSTRAP_ADMIN_PASSWORD", "Finance Admin", "Finance")
+
+
+def _seed_smoke() -> None:
+    """Create one Employee from the smoke-test settings, once."""
+    _seed_user("SMOKE_TEST_EMAIL", "SMOKE_TEST_PASSWORD", "Smoke Test", "Employee")
 
 
 @asynccontextmanager

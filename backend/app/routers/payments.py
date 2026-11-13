@@ -1,13 +1,12 @@
 """Finance marks an approved claim as paid. No payment is processed."""
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import require_auth
-from app.models import Claim, User, record_status_change, utcnow
-from app.routers.claims import _out, _visible_claim
+from app.models import User, record_status_change, utcnow
+from app.routers.claims import _out, _visible_claim, locked_status
 from app.schemas import ClaimOut
 from app.services.decisions import assert_not_submitter
 from app.services.notifications import notify_submitter
@@ -23,13 +22,7 @@ def mark_paid(
     if user.role != "Finance":
         raise HTTPException(status_code=403, detail="Forbidden")
     assert_not_submitter(claim, user)
-    status = db.scalar(
-        select(Claim.status)
-        .where(Claim.id == claim.id)
-        .with_for_update()
-        .execution_options(populate_existing=True)
-    )
-    if status != "approved":
+    if locked_status(db, claim.id) != "approved":
         raise HTTPException(status_code=409, detail="Claim is not awaiting payment")
     record_status_change(db, claim, "approved", "paid", user)
     claim.status = "paid"

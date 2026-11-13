@@ -1,7 +1,7 @@
 """Engine, session factory and the request-scoped session dependency.
 
-PostgreSQL is the project database: set `DATABASE_URL`. The SQLite default is
-only a local convenience and must not be relied on in a deployment.
+PostgreSQL is the project database: `DATABASE_URL` is required and startup fails
+fast without it.
 """
 
 import os
@@ -10,7 +10,7 @@ from collections.abc import Iterator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 # SQLite rejects a connection made on one thread and used on another, which is
 # exactly what happens when FastAPI runs a sync dependency in its threadpool.
