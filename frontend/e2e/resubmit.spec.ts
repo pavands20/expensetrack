@@ -14,7 +14,12 @@ async function login(request: APIRequestContext, email: string, password: string
   return (await r.json()).token as string;
 }
 
-async function makeUser(request: APIRequestContext, admin: string, role: string, managerId?: number) {
+async function makeUser(
+  request: APIRequestContext,
+  admin: string,
+  role: string,
+  managerId?: number,
+) {
   const uid = crypto.randomUUID().slice(0, 8);
   const email = `${role.toLowerCase()}-${uid}@example.com`;
   const password = crypto.randomUUID();
