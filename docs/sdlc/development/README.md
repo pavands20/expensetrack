@@ -3,71 +3,80 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### US-012 · draft · source: dev:US-012
+### US-016 · draft · source: dev:US-016
 
-Receipts are viewed through short-lived private links. The ticket was delivered in its own commit.
+Ticket US-016, 'Mark an approved claim as paid', is recorded as delivered in commit 76c2fdc. This is the final payment step in the claim workflow.
 
-- Ticket: US-012, View receipts through short-lived private links
-- Input status: delivered
-- Commit: 3b7a09d814f228f23d5dcd6bd5715e92b0edfd62
-- Context from project description: receipts are images or PDFs up to 5 MB, one per claim line, stored in S3.
-- Not stated in input: link expiry duration, implementation approach, delivery date, author, reviewer.
+- Ticket: US-016, 'Mark an approved claim as paid'
+- Development status (as given): delivered
+- Commit: 76c2fdc2c6f34f1bfcbf507a762e2c94099d87a5. No other ticket in this run references this commit.
+- Requirement context (project description, not confirmed as implemented detail): Finance approves or rejects manager-approved claims and marks approved ones paid.
+- Not stated in input: date, developer, reviewer, test results.
 
-**Related:** US-012
+### US-018 · draft · source: dev:US-018
 
-### US-014 · draft · source: dev:US-014
+Ticket US-018, 'Rejected claim returns to the employee to fix and resubmit', is recorded as delivered. It shares commit c25d46e with US-020.
 
-Managers can approve or reject submitted claims from their direct reports, with a comment. The ticket was delivered in the same commit as the rest of the approval chain.
+- Ticket: US-018, 'Rejected claim returns to the employee to fix and resubmit'
+- Development status (as given): delivered
+- Commit: c25d46e099e421c74f348e17f95d1fbc078def7b. The same commit is listed for US-020.
+- Requirement context (project description):
+  - A manager or Finance user can reject a claim with a comment.
+  - A draft claim can be edited; a submitted claim cannot.
+  - The input does not say how a rejected claim becomes editable again. That is not documented here.
+- Not stated in input: date, developer, reviewer, test results.
 
-- Ticket: US-014, Manager approves or rejects direct reports' claims
-- Input status: delivered
-- Commit: 9efab7c4cca00d09dc4ca19037e84d27cc6993bb (shared with US-015, US-017, US-025)
-- Context from project description: a manager acts on submitted claims from direct reports and adds a comment. A manager-approved claim then goes to Finance.
-- Clarification: a claim submitted by a Manager or a Finance user is approved first by that person's assigned manager, then by Finance.
-- Not stated in input: delivery date, author, reviewer, implementation specifics.
+**Related:** US-020
 
-**Related:** US-014, US-015, US-017, US-025
+### US-020 · draft · source: dev:US-020
 
-### US-015 · draft · source: dev:US-015
+Ticket US-020, 'Flag over-limit lines for approvers', is recorded as delivered. It shares commit c25d46e with US-018.
 
-Finance can approve or reject claims that a manager has already approved. The ticket was delivered in the shared approval-chain commit.
+- Ticket: US-020, 'Flag over-limit lines for approvers'
+- Development status (as given): delivered
+- Commit: c25d46e099e421c74f348e17f95d1fbc078def7b. The same commit is listed for US-018.
+- Requirement context (project description):
+  - Finance manages categories (Travel, Meals, Equipment, Other), each with an optional per-line limit.
+  - Lines over the limit are flagged for the approver.
+- Not stated in input: date, developer, reviewer, test results. The input also has no ticket for category management itself.
 
-- Ticket: US-015, Finance approves or rejects manager-approved claims
-- Input status: delivered
-- Commit: 9efab7c4cca00d09dc4ca19037e84d27cc6993bb (shared with US-014, US-017, US-025)
-- Context from project description: Finance acts only after manager approval, and Finance marks approved claims as paid.
-- Not in this ticket's title: 'mark paid'. The development input does not say whether it was delivered under this ticket or another one.
-- Not stated in input: delivery date, author, reviewer, implementation specifics.
+**Related:** US-018
 
-**Related:** US-015, US-014, US-017, US-025
+### US-021 · draft · source: dev:US-021
 
-### US-017 · draft · source: dev:US-017
+Ticket US-021, 'Employee dashboard of own claims by status', is recorded as delivered. It shares commit 51da9ee with US-023 and US-024.
 
-The approval chain enforces that nobody can approve their own claim. The ticket was delivered in the shared approval-chain commit.
+- Ticket: US-021, 'Employee dashboard of own claims by status'
+- Development status (as given): delivered
+- Commit: 51da9ee548605c7e18364e22d769bbe19f05d3c3. The same commit is listed for US-023 and US-024.
+- Requirement context (project description): employees see their claims by status on the dashboard.
+- Not stated in input: date, developer, reviewer, test results.
 
-- Ticket: US-017, Nobody approves their own claim
-- Input status: delivered
-- Commit: 9efab7c4cca00d09dc4ca19037e84d27cc6993bb (shared with US-014, US-015, US-025)
-- Clarification: claims from Managers and Finance users go to the claimant's assigned manager, then to Finance.
-- Not stated in input:
-  - how the Finance stage is handled when the claimant is a Finance user (for example, whether a different Finance user must act);
-  - how the rule is enforced in code;
-  - delivery date, author, reviewer.
+**Related:** US-023, US-024
 
-**Related:** US-017, US-014, US-015
+### US-023 · draft · source: dev:US-023
 
-### US-025 · draft · source: dev:US-025
+Ticket US-023, 'Export approved claims as CSV with a date range', is recorded as delivered. It shares commit 51da9ee with US-021 and US-024.
 
-Claim status changes are recorded in an audit trail. The ticket was delivered in the shared approval-chain commit.
+- Ticket: US-023, 'Export approved claims as CSV with a date range'
+- Development status (as given): delivered
+- Commit: 51da9ee548605c7e18364e22d769bbe19f05d3c3. The same commit is listed for US-021 and US-024.
+- Requirement context (project description): Finance can export approved claims as CSV.
+- The ticket title adds a date-range filter, which the project description does not mention. The ticket title is the source for that detail.
+- Not stated in input: CSV columns, date, developer, reviewer, test results.
 
-- Ticket: US-025, Audit trail of claim status changes
-- Input status: delivered
-- Commit: 9efab7c4cca00d09dc4ca19037e84d27cc6993bb (shared with US-014, US-015, US-017)
-- Not stated in input:
-  - which fields are captured (actor, timestamp, comment, previous and new status);
-  - retention period;
-  - who can view the trail;
-  - delivery date, author, reviewer.
+**Related:** US-021, US-024
 
-**Related:** US-025, US-014, US-015
+### US-024 · draft · source: dev:US-024
+
+Ticket US-024, 'Email notifications on submission and decisions', is recorded as delivered. It shares commit 51da9ee with US-021 and US-023.
+
+- Ticket: US-024, 'Email notifications on submission and decisions'
+- Development status (as given): delivered
+- Commit: 51da9ee548605c7e18364e22d769bbe19f05d3c3. The same commit is listed for US-021 and US-023.
+- Requirement context: the project description only mentions email for password reset. Notifications on claim submission and on approval or rejection come from this ticket's title.
+- Approval routing confirmed in project clarification: claims from Managers and Finance users go to their assigned manager first, then to Finance. Nobody approves their own claim.
+- Not stated in input: recipients, email content, date, developer, reviewer, test results.
+
+**Related:** US-021, US-023
 <!-- sdlc:auto:end narrative -->

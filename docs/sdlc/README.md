@@ -9,7 +9,7 @@ Managers and Finance staff also incur expenses. Who should approve a claim submi
 
 Assigned manager, then Finance
 
-**Documentation version:** v20
+**Documentation version:** v21
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -20,7 +20,7 @@ Assigned manager, then Finance
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 31 entries |
 | [Planning](planning/README.md) | 0 entries |
-| [Development](development/README.md) | 5 entries |
+| [Development](development/README.md) | 6 entries |
 | [Testing](testing/README.md) | 3 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
@@ -29,12 +29,12 @@ Assigned manager, then Finance
 | [Decisions (ADRs)](architecture/adr/README.md) | 6 decisions |
 | [Sprint plan](development/sprint-plan.md) | 6 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
-| [API reference](development/api-reference.md) | 26 routes |
+| [API reference](development/api-reference.md) | 28 routes |
 | [Test report](testing/test-report.md) | no_tests |
-| [Tests](testing/test-cases.md) | 219 tests |
+| [Tests](testing/test-cases.md) | 303 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 5 releases |
 | [Traceability matrix](traceability-matrix.md) | 27 requirements |
-| [Changelog](CHANGELOG.md) | 20 versions |
+| [Changelog](CHANGELOG.md) | 21 versions |
 <!-- sdlc:auto:end contents -->

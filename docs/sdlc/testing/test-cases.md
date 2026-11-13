@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-219 tests · Passed 219 · Failed 0 · Skipped 0 · Not run 0
+303 tests · Passed 302 · Failed 1 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 64/102 · passing: 64/102
+Acceptance criteria covered: 86/102 · passing: 85/102
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -29,7 +29,7 @@ Acceptance criteria covered: 64/102 · passing: 64/102
 | AC-019 | App > [AC-019] redirects to sign-in with no token | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-019 | App > [AC-019] renders the shell when signed in | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-020 | App > [AC-020] reset confirm shows the invalid-link message on 400 | Unit | Passed | `frontend/src/App.test.tsx` |
-| AC-021 | App > [AC-021] sign out clears the token even if logout fails | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-021 | App > [AC-021] sign out clears the token even if logout fails | Unit | Failed | `frontend/src/App.test.tsx` |
 | AC-022 | App > [AC-022] shows the notice when me returns 401 | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-017 | test_ac017_login_returns_token_usable_as_bearer | Integration | Passed | `backend/tests/test_auth.py` |
 | AC-018 | test_ac018_identical_401 | Integration | Passed | `backend/tests/test_auth.py` |
@@ -286,6 +286,122 @@ Acceptance criteria covered: 64/102 · passing: 64/102
 | AC-056 | test_ac056_over_limit | Integration | Passed | `backend/tests/test_decisions.py` |
 | AC-059 | test_ac059_helper_and_invalid_decision | Integration | Passed | `backend/tests/test_decisions.py` |
 | AC-060, AC-068 | test_ac060_ac068_finance_own_claim | Integration | Passed | `backend/tests/test_decisions.py` |
+
+## Sprint 5
+
+### US-016: Mark an approved claim as paid
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-062 | test_ac062_finance_marks_paid_and_history_records_actor | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-063 | test_ac063_not_approved_is_409[draft] | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-063 | test_ac063_not_approved_is_409[paid] | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-063 | test_ac063_not_approved_is_409[pending_finance] | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-064 | test_ac064_non_finance_forbidden_invisible_404_unauth_401 | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-065 | test_ac065_submitter_cannot_mark_own_paid | Unit | Passed | `backend/tests/test_mark_paid.py` |
+| AC-062 | test_ac062_finance_marks_approved_claim_paid_with_history | Integration | Passed | `backend/tests/integration/test_mark_paid_acceptance_qa.py` |
+| AC-063 | test_ac063_non_approved_claims_refused_409_and_unchanged | Integration | Passed | `backend/tests/integration/test_mark_paid_acceptance_qa.py` |
+| AC-064, NFR-004 | test_ac064_nfr004_employee_and_manager_get_403_claim_stays_approved | Integration | Passed | `backend/tests/integration/test_mark_paid_acceptance_qa.py` |
+| AC-065, NFR-005 | test_ac065_nfr005_finance_submitter_refused_claim_stays_approved | Integration | Passed | `backend/tests/integration/test_mark_paid_acceptance_qa.py` |
+| NFR-008 | test_nfr008_mark_paid_unknown_claim_404 | Integration | Passed | `backend/tests/integration/test_mark_paid_acceptance_qa.py` |
+
+### US-018: Rejected claim returns to the employee to fix and resubmit
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-069 | test_ac069_finance_reject_returns_editable_draft | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-069 | test_ac069_manager_reject_returns_editable_draft | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-070 | test_ac070_resubmit_after_finance_reject_restarts_at_manager | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-070 | test_ac070_resubmit_after_manager_reject_goes_to_manager | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-070 | test_ac070_resubmit_without_manager_goes_to_finance | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-071 | test_ac071_history_keeps_rejection_after_resubmit | Unit | Passed | `backend/tests/test_resubmit.py` |
+| AC-069 | test_ac069_finance_rejected_is_editable_draft_with_name_and_comment | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-069 | test_ac069_manager_rejected_is_editable_draft_with_name_and_comment | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-070 | test_ac070_no_manager_resubmit_goes_to_finance | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-070 | test_ac070_resubmit_after_finance_rejection_restarts_from_manager_stage | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-070 | test_ac070_resubmit_after_manager_rejection_restarts_at_manager | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-070 | test_ac070_resubmit_uses_current_manager_after_change | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-071 | test_ac071_rejection_and_comment_stay_in_history_after_resubmit | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| NFR-008, AC-069, AC-071 | test_nfr008_ac069_ac071_rejected_claim_and_history_hidden_from_others | Integration | Passed | `backend/tests/integration/test_resubmit_acceptance_qa.py` |
+| AC-069 | [AC-069] rejected claim opens as an editable draft showing approver name and comment | E2E | Passed | `frontend/e2e/resubmit.spec.ts` |
+| AC-070, AC-071 | [AC-070][AC-071] resubmitting restarts approval and history keeps the rejection comment | E2E | Passed | `frontend/e2e/resubmit.spec.ts` |
+
+### US-020: Flag over-limit lines for approvers
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-077 | test_ac077_limit_field_on_mutation_get_list_and_queue | Unit | Passed | `backend/tests/test_over_limit_limit_field.py` |
+| AC-077 | test_ac077_null_when_no_limit | Unit | Passed | `backend/tests/test_over_limit_limit_field.py` |
+| AC-078 | test_ac078_equal_to_limit_is_not_over | Unit | Passed | `backend/tests/test_over_limit_limit_field.py` |
+| AC-079 | test_ac079_submit_with_over_limit_line_succeeds | Unit | Passed | `backend/tests/test_over_limit_limit_field.py` |
+| AC-077 | over-limit flag > [AC-077] Finance sees the flag too | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-077 | over-limit flag > [AC-077] a manager sees the flag with the limit on an over-limit line | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-077 | over-limit flag > [AC-077] queue rows flag claims with an over-limit line only | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-077 | over-limit flag > [AC-077] the owner does not see the flag | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-078 | over-limit flag > [AC-078] a line that is not over limit shows no flag | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-079 | over-limit flag > [AC-079] the employee's submit is not blocked by an over-limit line | Unit | Passed | `frontend/src/screens/Approvals.test.tsx` |
+| AC-077 | [AC-077] manager and Finance see the over-limit flag with the limit; queue marks the claim | E2E | Passed | `frontend/e2e/over-limit.spec.ts` |
+| AC-078 | [AC-078] exactly £50.00 and a no-limit category show no flag | E2E | Passed | `frontend/e2e/over-limit.spec.ts` |
+| AC-079 | [AC-079] employee submits a claim with an over-limit line successfully | E2E | Passed | `frontend/e2e/over-limit.spec.ts` |
+| NFR-008 | [NFR-008] over-limit claim data is limited by role | E2E | Passed | `frontend/e2e/over-limit.spec.ts` |
+
+### US-021: Employee dashboard of own claims by status
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-080, AC-082 | Dashboard > [AC-080] [AC-082] tabs show counts and the API's claims only | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-080 | Dashboard > [AC-080] deleting a draft calls DELETE and refetches | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-081 | Dashboard > [AC-081] a returned claim shows who returned it and opens the claim | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-083 | Dashboard > [AC-083] with no claims it shows the empty state and a New claim button | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-080 | test_ac080_groups_and_counts | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-081 | test_ac081_rejected_in_draft_with_last_rejection | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-082 | test_ac082_only_own_claims[Employee] | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-082 | test_ac082_only_own_claims[Finance] | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-082 | test_ac082_only_own_claims[Manager] | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-083 | test_ac083_empty_and_unauthenticated | Integration | Passed | `backend/tests/test_dashboard.py` |
+| — | test_smoke_seed_idempotent_and_unset | Integration | Passed | `backend/tests/test_dashboard.py` |
+| AC-080 | [AC-080] claims in several statuses show a count and the right claims per tab | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-081 | [AC-081] rejected claim opens as an editable draft showing the approver's comment | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-083 | [AC-083] a user with no claims sees the empty state with a way to create a claim | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+
+### US-023: Export approved claims as CSV with a date range
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-087 | test_ac087_one_row_per_line_with_required_columns | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-087 | test_ac087_paid_claims_included_with_status | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-088 | test_ac088_claims_approved_outside_range_excluded | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-089 | test_ac089_end_before_start_refused_with_message | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-090 | test_ac090_no_matches_returns_headers_only | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-091, NFR-004 | test_ac091_nfr004_employee_and_manager_get_403 | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| NFR-008 | test_nfr008_export_personal_data_role_limited | Integration | Passed | `backend/tests/integration/test_csv_export_acceptance_qa.py` |
+| AC-087, AC-088 | test_ac087_ac088_rows_and_range | Integration | Passed | `backend/tests/test_export.py` |
+| AC-089 | test_ac089_bad_dates_422 | Integration | Passed | `backend/tests/test_export.py` |
+| AC-090 | test_ac090_empty_header_only | Integration | Passed | `backend/tests/test_export.py` |
+| AC-091 | test_ac091_roles | Integration | Passed | `backend/tests/test_export.py` |
+
+### US-024: Email notifications on submission and decisions
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-092 | test_ac092_manager_approval_emails_finance_and_submitter | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-092 | test_ac092_no_manager_emails_other_finance_only | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-092 | test_ac092_submit_emails_manager | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-093 | test_ac093_failed_action_sends_nothing | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-093 | test_ac093_outcomes_emailed_with_reference_and_comment | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-094 | test_ac094_send_failure_does_not_block_and_is_logged | Unit | Passed | `backend/tests/test_notifications.py` |
+| AC-092 | test_ac092_finance_submitter_not_emailed_as_approver | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-092 | test_ac092_no_manager_emails_finance_who_can_act_not_submitter | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-092 | test_ac092_submit_emails_manager_not_submitter | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-093 | test_ac093_finance_approve_emails_submitter_with_comment | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-093 | test_ac093_finance_reject_emails_submitter_with_comment | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-093 | test_ac093_manager_approve_emails_submitter | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-093 | test_ac093_manager_reject_emails_submitter_with_comment | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-093 | test_ac093_mark_paid_emails_submitter | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-094, NFR-010 | test_ac094_nfr010_decisions_succeed_when_email_fails | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-094, NFR-010 | test_ac094_nfr010_mark_paid_succeeds_when_email_fails | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| AC-094, NFR-010 | test_ac094_nfr010_submit_succeeds_when_email_fails | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
+| NFR-008 | test_nfr008_notification_emails_only_to_relevant_users | Integration | Passed | `backend/tests/integration/test_notifications_acceptance_qa.py` |
 
 ## Project setup
 
