@@ -13,4 +13,7 @@ import { afterEach } from "vitest";
 // Every test starts on an empty document. Vitest does not unmount between
 // tests, and a component left mounted makes the next `getByRole` ambiguous --
 // which reads as a broken component rather than a dirty fixture.
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  sessionStorage.clear();
+});

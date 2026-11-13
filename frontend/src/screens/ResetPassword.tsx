@@ -108,7 +108,7 @@ function ConfirmForm({ token }: { token: string }) {
           ? "This reset link has already been used or has expired. Request a new one."
           : "Could not reset your password. Please try again.",
       );
-      setDetail(used ? err.detail : "");
+      setDetail(used ? err.message : "");
     } finally {
       setBusy(false);
     }

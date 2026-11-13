@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { apiFetch } from "@/lib/api";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
-import { useNavigate } from "@/lib/navigate";
 import { Table, THead, TBody, TR, TH, TD } from "@/lib/ui";
 
 type Key = "draft" | "submitted" | "manager_approved" | "approved" | "paid";
@@ -68,7 +67,6 @@ const td = {
 };
 
 function DashboardView() {
-  const navigate = useNavigate();
   const [active, setActive] = React.useState<Key>("draft");
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [confirming, setConfirming] = React.useState(false);
@@ -173,16 +171,6 @@ function DashboardView() {
               <Icons.Plus className="w-4 h-4" aria-hidden="true" />
               New claim
             </Link>
-          </div>
-          <div className="col-span-6 md:col-span-2">
-            <button
-              type="button"
-              onClick={() => navigate("sign-in")}
-              className="et-btn w-full inline-flex items-center justify-center px-4 font-semibold"
-              style={{ ...glass, minHeight: 48, color: "white", cursor: "pointer" }}
-            >
-              Sign out
-            </button>
           </div>
         </header>
 

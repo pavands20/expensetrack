@@ -11,7 +11,7 @@ type Category = { id: number; name: string; limit_gbp: string | null; is_active:
 const DUPLICATE = "A category with that name already exists";
 const LIMIT_ERROR = "Enter an amount in pounds greater than 0 with at most 2 decimals";
 const msg = (e: unknown) =>
-  e instanceof ApiError ? (e.status === 403 ? "Access denied" : e.detail) : "Something went wrong";
+  e instanceof ApiError ? (e.status === 403 ? "Access denied" : e.message) : "Something went wrong";
 const validLimit = (v: string) => /^\d+(\.\d{1,2})?$/.test(v) && Number(v) > 0;
 const gbp = (v: string | null) => (v === null ? "No limit" : `£${Number(v).toFixed(2)}`);
 

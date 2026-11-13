@@ -30,7 +30,7 @@ type AdminUser = {
 };
 
 const ROLES: Role[] = ["Employee", "Manager", "Finance"];
-const msg = (e: unknown) => (e instanceof ApiError ? e.detail : "Something went wrong");
+const msg = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong");
 
 function ManagerSelect(props: {
   users: AdminUser[];
@@ -87,7 +87,7 @@ function CreateForm({ users, onDone }: { users: AdminUser[]; onDone: () => void 
       onDone();
     },
     onError: (e) => {
-      if (e instanceof ApiError && e.status === 409) setEmailError(e.detail);
+      if (e instanceof ApiError && e.status === 409) setEmailError(e.message);
       else setError(msg(e));
     },
   });

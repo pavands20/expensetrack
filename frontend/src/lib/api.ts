@@ -24,10 +24,11 @@ export const API_SECRET_KEY: string = import.meta.env.VITE_API_SECRET_KEY ?? "";
 // `setSessionToken` with it; apiFetch then sends it as the bearer on every later call,
 // ahead of the shared secret.
 const SESSION_TOKEN_KEY = "session_token";
+// The token lives in sessionStorage: it is gone when the tab closes.
 
 export function getSessionToken(): string | null {
   try {
-    return localStorage.getItem(SESSION_TOKEN_KEY);
+    return sessionStorage.getItem(SESSION_TOKEN_KEY);
   } catch {
     return null;
   }
@@ -35,7 +36,7 @@ export function getSessionToken(): string | null {
 
 export function setSessionToken(token: string): void {
   try {
-    localStorage.setItem(SESSION_TOKEN_KEY, token);
+    sessionStorage.setItem(SESSION_TOKEN_KEY, token);
   } catch {
     // Storage unavailable (private mode, quota): the session just won't persist.
   }
@@ -43,7 +44,7 @@ export function setSessionToken(token: string): void {
 
 export function clearSessionToken(): void {
   try {
-    localStorage.removeItem(SESSION_TOKEN_KEY);
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
   } catch {
     // Nothing to clear if storage was never reachable.
   }
@@ -51,9 +52,11 @@ export function clearSessionToken(): void {
 
 export class ApiError extends Error {
   status: number;
-  detail: string;
-  constructor(status: number, detail: string) {
-    super(detail);
+  // The server's `detail` as sent: a string, or the structured value FastAPI uses for
+  // validation errors. `message` is always a string that is safe to show.
+  detail: unknown;
+  constructor(status: number, detail: unknown, message?: string) {
+    super(message ?? (typeof detail === "string" ? detail : `Request failed: ${status}`));
     this.name = "ApiError";
     this.status = status;
     this.detail = detail;
@@ -85,10 +88,14 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     },
   });
   if (!response.ok) {
-    let detail = `${init?.method ?? "GET"} ${path} failed: ${response.status}`;
+    let detail: unknown = `${init?.method ?? "GET"} ${path} failed: ${response.status}`;
+    let message: string | undefined;
     try {
       const body = await response.json();
-      if (typeof body?.detail === "string") detail = body.detail;
+      if (body?.detail !== undefined && body.detail !== null) {
+        if (typeof body.detail !== "string") message = `Request failed: ${response.status}`;
+        detail = body.detail;
+      }
     } catch {
       // Body was not JSON; keep the generic message.
     }
@@ -96,7 +103,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       clearSessionToken();
       unauthorizedHandler?.();
     }
-    throw new ApiError(response.status, detail);
+    throw new ApiError(response.status, detail, message);
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }
